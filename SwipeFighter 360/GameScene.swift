@@ -10,11 +10,22 @@
 import SpriteKit
 import CoreMotion
 import AVFoundation
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
 
 protocol GameSceneDelegate {
-    func gameSceneDidFinish(myScene:GameScene, command: String)
-    func updateTransitionLevvel(myScene:GameScene)
-    func changeScene(myScene:GameScene, command: String)
+    func gameSceneDidFinish(_ myScene:GameScene, command: String)
+    func updateTransitionLevvel(_ myScene:GameScene)
+    func changeScene(_ myScene:GameScene, command: String)
 }
 
 class GameScene: SKScene,SKPhysicsContactDelegate{
@@ -113,7 +124,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     
     func cleanupStrongReferences(){
         var nodes:[SKNode] = []
-        enumerateChildNodesWithName("//*", usingBlock: {
+        enumerateChildNodes(withName: "//*", using: {
                 node, stop in nodes.append(node)
             })
         print("Node Count: \(nodes.count)")
@@ -121,13 +132,13 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
             node.removeAllActions()
         }
     }
-    func updateRocksForRemoval(currentTime: CFTimeInterval){
+    func updateRocksForRemoval(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForRockRemoval > 1.0{
             var badRockCount:Int = 0
             var allRocks: [SKNode] = []
-            self.enumerateChildNodesWithName("rock"){
+            self.enumerateChildNodes(withName: "rock"){
                 node, stop in allRocks.append(node)}
-            self.enumerateChildNodesWithName("brownRock"){
+            self.enumerateChildNodes(withName: "brownRock"){
                 node, stop in allRocks.append(node)}
             for rock in allRocks{
                 if rock.position.x > self.frame.width{
@@ -148,8 +159,8 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     }
     
     
-    override func didMoveToView(view: SKView) {
-        userInteractionEnabled = true
+    override func didMove(to view: SKView) {
+        isUserInteractionEnabled = true
         physicsWorld.contactDelegate = self
         motionManager.startAccelerometerUpdates()
         motionManager.startMagnetometerUpdates()
@@ -175,7 +186,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     func addShip(){
 
         let ship = SKSpriteNode(imageNamed:"newShip")
-        ship.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame))
+        ship.position = CGPoint(x:self.frame.midX, y:self.frame.midY)
         self.addChild(ship)
         ship.name = "ship"
         ship.physicsBody = SKPhysicsBody(circleOfRadius: ship.size.width/2)
@@ -187,11 +198,11 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
         ship.physicsBody!.collisionBitMask = edgeCategory
         ship.physicsBody!.fieldBitMask = 0x00000000
     }
-    func degree2radian(a:CGFloat)->CGFloat {
+    func degree2radian(_ a:CGFloat)->CGFloat {
         let b = CGFloat(M_PI) * a/180
         return b
     }
-    func polygonPointArray(sides:Int,x:CGFloat,y:CGFloat,radius:CGFloat,offset:CGFloat)->[CGPoint] {
+    func polygonPointArray(_ sides:Int,x:CGFloat,y:CGFloat,radius:CGFloat,offset:CGFloat)->[CGPoint] {
         let angle = degree2radian(360/CGFloat(sides))
         let cx = x // x origin
         let cy = y // y origin
@@ -208,26 +219,26 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
         return points
     }
 
-    func polygonPath(x:CGFloat, y:CGFloat, radius:CGFloat, sides:Int, offset: CGFloat) -> CGPathRef {
-        let path = CGPathCreateMutable()
+    func polygonPath(_ x:CGFloat, y:CGFloat, radius:CGFloat, sides:Int, offset: CGFloat) -> CGPath {
+        let path = CGMutablePath()
         let points = polygonPointArray(sides,x: x,y: y,radius: radius, offset: offset)
         let cpg = points[0]
-        CGPathMoveToPoint(path, nil, cpg.x, cpg.y)
+        path.move(to: CGPoint(x: cpg.x, y: cpg.y), transform: CGAffineTransform())
         for p in points {
-            CGPathAddLineToPoint(path, nil, p.x, p.y)
+            path.addLine(to: CGPoint(x: p.x, y: p.y))
         }
-        CGPathCloseSubpath(path)
+        path.closeSubpath()
         return path
     }
     
-    func assymetricalPolygonPath(points:[CGPoint])->CGPathRef{
-        let path = CGPathCreateMutable()
+    func assymetricalPolygonPath(_ points:[CGPoint])->CGPath{
+        let path = CGMutablePath()
         let cpg = points[0]
-        CGPathMoveToPoint(path, nil, cpg.x, cpg.y)
+        path.move(to: CGPoint(x: cpg.x, y: cpg.y), transform: CGAffineTransform())
         for p in points {
-            CGPathAddLineToPoint(path, nil, p.x, p.y)
+            path.addLine(to: CGPoint(x: p.x, y: p.y))
         }
-        CGPathCloseSubpath(path)
+        path.closeSubpath()
         return path
     }
     
@@ -238,15 +249,15 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
         boundary.xScale = 1.04
         boundary.yScale = 1.04
         self.addChild(boundary)
-        boundary.physicsBody = SKPhysicsBody(edgeLoopFromRect: CGRectMake(-frame.width/2, -frame.height/2, frame.width, frame.height))
+        boundary.physicsBody = SKPhysicsBody(edgeLoopFrom: CGRect(x: -frame.width/2, y: -frame.height/2, width: frame.width, height: frame.height))
         boundary.physicsBody!.affectedByGravity = false
-        boundary.physicsBody!.dynamic = false
+        boundary.physicsBody!.isDynamic = false
         boundary.physicsBody!.categoryBitMask = edgeCategory
         boundary.physicsBody!.contactTestBitMask = bulletCategory
         boundary.physicsBody!.collisionBitMask = 0xFFFFFFFF
     }
     
-    func playTheme(backgroundAudio: AVAudioPlayer, volume: Float){
+    func playTheme(_ backgroundAudio: AVAudioPlayer, volume: Float){
         backgroundAudio.volume = volume
         backgroundAudio.currentTime = 0
         backgroundAudio.play()
@@ -254,19 +265,19 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     }
     func addFireButton(){
         let fireButton = UIButton(frame: CGRect(x: 0, y: scene!.size.height-90, width: 90, height: 90))
-        fireButton.backgroundColor = UIColor.clearColor()
-        fireButton.setTitle("FIRE", forState: UIControlState.Normal)
-        fireButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), forState: UIControlState.Normal)
-        fireButton.addTarget(self, action: #selector(GameScene.fireAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+        fireButton.backgroundColor = UIColor.clear
+        fireButton.setTitle("FIRE", for: UIControlState())
+        fireButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), for: UIControlState())
+        fireButton.addTarget(self, action: #selector(GameScene.fireAction(_:)), for: UIControlEvents.touchDown)
         self.view!.addSubview(fireButton)
     }
 
     func addSlowButton(){
         slowButton = UIButton(frame: CGRect(x: 0, y: 0, width: 90, height: 90))
-        slowButton.backgroundColor = UIColor.clearColor()
-        slowButton.setTitle("FAST", forState: UIControlState.Normal)
-        slowButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), forState: UIControlState.Normal)
-        slowButton.addTarget(self, action: #selector(GameScene.adjustTurnAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+        slowButton.backgroundColor = UIColor.clear
+        slowButton.setTitle("FAST", for: UIControlState())
+        slowButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), for: UIControlState())
+        slowButton.addTarget(self, action: #selector(GameScene.adjustTurnAction(_:)), for: UIControlEvents.touchDown)
         self.view!.addSubview(slowButton)
     }
 
@@ -280,27 +291,27 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     }
 // MARK: USER CONTROLS SECTION
     
-    func fireAction(sender: UIButton!){
+    func fireAction(_ sender: UIButton!){
         fireBullets()
     }
 
-    func adjustTurnAction(sender: UIButton!){
+    func adjustTurnAction(_ sender: UIButton!){
         if fast == true{
-            slowButton.setTitle("SLOW", forState: UIControlState.Normal)
+            slowButton.setTitle("SLOW", for: UIControlState())
             fast = false
         }else{
-            slowButton.setTitle("FAST", forState: UIControlState.Normal)
+            slowButton.setTitle("FAST", for: UIControlState())
             fast = true
         }
     }
-    func processUserMotionForUpdate(currentTime: CFTimeInterval){
+    func processUserMotionForUpdate(_ currentTime: CFTimeInterval){
         
         if (currentTime - timeOfLastUpdateForUserMotion > 0.1) {
             
-            if let ship = self.childNodeWithName("ship") as! SKSpriteNode!{
+            if let ship = self.childNode(withName: "ship") as! SKSpriteNode!{
                 
                 if let data = motionManager.accelerometerData {
-                    ship.runAction(SKAction.rotateByAngle(-CGFloat(data.acceleration.y * attenuationSteeringFactor), duration:0.1))
+                    ship.run(SKAction.rotate(byAngle: -CGFloat(data.acceleration.y * attenuationSteeringFactor), duration:0.1))
                     shipAngle -= data.acceleration.y * attenuationSteeringFactor
                     timeOfLastUpdateForUserMotion = currentTime
                 }
@@ -335,19 +346,19 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     }
     func fireBullets(){
         if bulletDelay == false{
-            if let ship = self.childNodeWithName("ship"){
-                let bullet = SKSpriteNode(color: UIColor.greenColor(), size: CGSize(width: 3, height: 9))
-                bullet.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: bullet.frame.width, height: bullet.frame.height))
+            if let ship = self.childNode(withName: "ship"){
+                let bullet = SKSpriteNode(color: UIColor.green, size: CGSize(width: 3, height: 9))
+                bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bullet.frame.width, height: bullet.frame.height))
                 let unitVelocity = bulletTrajectory()
                 let bulletVelocity = CGVector(dx: unitVelocity.dx * 350.0, dy: unitVelocity.dy * 350.0)
                 let bulletDisplacementX = unitVelocity.dx * 10.0
                 let bulletDisplacementY = unitVelocity.dy * 10.0
                 let bulletPosition = CGPoint(x: ship.position.x + bulletDisplacementX,y: ship.position.y + bulletDisplacementY)
                 bullet.position = bulletPosition
-                bullet.runAction(SKAction.rotateByAngle(CGFloat(shipAngle), duration: 0.01))
+                bullet.run(SKAction.rotate(byAngle: CGFloat(shipAngle), duration: 0.01))
                 bullet.name = "bullet"
                 bullet.physicsBody?.affectedByGravity = false
-                bullet.physicsBody?.dynamic = true
+                bullet.physicsBody?.isDynamic = true
                 bullet.physicsBody?.mass = 0.01
                 bullet.physicsBody?.categoryBitMask = bulletCategory
                 bullet.physicsBody?.contactTestBitMask = rockCategory | edgeCategory
@@ -362,7 +373,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
                     return
                 }
                 let soundAction = SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: true)
-                bullet.runAction(soundAction, withKey: "bulletSound")
+                bullet.run(soundAction, withKey: "bulletSound")
                 //bullet.runAction(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: true))
                 // update function toggles bulletDelay to false per bulletTimer in updateBulletDelay
             }
@@ -371,29 +382,29 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     
 // MARK: CONTACT SECTION
     
-    func didBeginContact(contact: SKPhysicsContact){ // adds contacts from contactDelegate into an array
+    func didBegin(_ contact: SKPhysicsContact){ // adds contacts from contactDelegate into an array
         if contact as SKPhysicsContact? != nil {
             self.contactArray.append(contact)
         }
     }
-    func handleContact(contact: SKPhysicsContact) { // helper function: main guts of update
+    func handleContact(_ contact: SKPhysicsContact) { // helper function: main guts of update
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
 // subclasses handle specific instances of contact
     }
-    func processContactsForUpdate(currentTime: CFTimeInterval){
+    func processContactsForUpdate(_ currentTime: CFTimeInterval){
         for contact in self.contactArray {
             self.handleContact(contact)
-            if let index = (self.contactArray as NSArray).indexOfObject(contact) as Int? {
-                self.contactArray.removeAtIndex(index)
+            if let index = (self.contactArray as NSArray).index(of: contact) as Int? {
+                self.contactArray.remove(at: index)
             }
         }
     }
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if !swipeMode{
             for touch in touches {
-                if let ship = childNodeWithName("ship"){
+                if let ship = childNode(withName: "ship"){
                     //let x = touch.locationInNode(self).x
                     //let y = touch.locationInNode(self).y
                     //let dx = x - ship.position.x
@@ -401,43 +412,43 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
                     //let shipVelocity = CGVector(dx: 1.5*dx, dy: 1.5*dy)
                     //ship.runAction(SKAction.applyForce(shipVelocity, duration: 0.05))
                     let scalingFactor:CGFloat = 11.0
-                    let dx = touch.locationInNode(self).x - ship.position.x
-                    let dy = touch.locationInNode(self).y - ship.position.y
+                    let dx = touch.location(in: self).x - ship.position.x
+                    let dy = touch.location(in: self).y - ship.position.y
                     let shipVelocity = CGVector(dx: scalingFactor*dx, dy: scalingFactor*dy)
                     // while function acts like high pass filter
                     /*while abs(shipVelocity.dx) > CGFloat(650) || abs(shipVelocity.dy) > CGFloat(650){
                         shipVelocity = CGVector(dx: shipVelocity.dx * CGFloat(0.5), dy: shipVelocity.dy * CGFloat(0.5))
                     }*/
-                    let waitAction = SKAction.waitForDuration(0.15)
+                    let waitAction = SKAction.wait(forDuration: 0.15)
                     let moveAction = SKAction.applyForce(shipVelocity, duration: 0.04)
-                    let stopAction = (SKAction.runBlock({
+                    let stopAction = (SKAction.run({
                         ship.physicsBody?.velocity = CGVector(dx: 0, dy: 0)}))
                     let actionSequence:[SKAction] = [moveAction, waitAction, stopAction]
-                    ship.runAction(SKAction.sequence(actionSequence))
+                    ship.run(SKAction.sequence(actionSequence))
                 }
             }
         }
 
     }
 
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if swipeMode{
             for touch in touches {
-                if let ship = childNodeWithName("ship"){
+                if let ship = childNode(withName: "ship"){
                     let scalingFactor:CGFloat = 11.0
-                    let dx = touch.locationInNode(self).x - ship.position.x
-                    let dy = touch.locationInNode(self).y - ship.position.y
+                    let dx = touch.location(in: self).x - ship.position.x
+                    let dy = touch.location(in: self).y - ship.position.y
                     var shipVelocity = CGVector(dx: scalingFactor*dx, dy: scalingFactor*dy)
                     // while function acts like high pass filter
                     while abs(shipVelocity.dx) > CGFloat(650) || abs(shipVelocity.dy) > CGFloat(650){
                         shipVelocity = CGVector(dx: shipVelocity.dx * CGFloat(0.5), dy: shipVelocity.dy * CGFloat(0.5))
                     }
-                    let waitAction = SKAction.waitForDuration(0.15)
+                    let waitAction = SKAction.wait(forDuration: 0.15)
                     let moveAction = SKAction.applyForce(shipVelocity, duration: 0.04)
-                    let stopAction = (SKAction.runBlock({
+                    let stopAction = (SKAction.run({
                         ship.physicsBody?.velocity = CGVector(dx: 0, dy: 0)}))
                     let actionSequence:[SKAction] = [moveAction, waitAction, stopAction]
-                    ship.runAction(SKAction.sequence(actionSequence))
+                    ship.run(SKAction.sequence(actionSequence))
                 }
             }
         }
@@ -445,11 +456,11 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
 
 // LEVEL AND GAME ENDING SECTION
     
-    func gameEnded(currentTime: CFTimeInterval)->Bool{
+    func gameEnded(_ currentTime: CFTimeInterval)->Bool{
 // subclasses of GameScene call gameEnded because the ship always has to exist
         var allShips: [SKNode] = []
         // put nodes in array
-        self.enumerateChildNodesWithName("ship"){//<--FIND SHIPS HERE
+        self.enumerateChildNodes(withName: "ship"){//<--FIND SHIPS HERE
             node, stop in allShips.append(node)}
         if(allShips.count == 0){
             return true
@@ -458,9 +469,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
     }
 
 
-    func updateDisplayAccuracy(currentTime:CFTimeInterval){
+    func updateDisplayAccuracy(_ currentTime:CFTimeInterval){
         if currentTime - timeOfLastUpdateForAccuracy > 0.3{
-            if let acc = childNodeWithName("accuracy") as? SKLabelNode{
+            if let acc = childNode(withName: "accuracy") as? SKLabelNode{
                 if self.highScore?.level < 99{
                     if bulletsFired != 0 {
                         accuracy = Double(monstersHit) / Double(bulletsFired)
@@ -479,19 +490,19 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
         }
     }
     
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         processUserMotionForUpdate(currentTime)
         updateBulletDelay(currentTime)
         updateRateOfTurning(currentTime)
         updateDisplayAccuracy(currentTime)
     }
-    func updateBulletDelay(currentTime: CFTimeInterval){
+    func updateBulletDelay(_ currentTime: CFTimeInterval){
         if currentTime - bulletTimer > 0.4{
             bulletDelay = false
             bulletTimer = currentTime
         }
     }
-    func updateRateOfTurning(currentTime: CFTimeInterval){
+    func updateRateOfTurning(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForRateOfTurn > 0.5{
             if !fast{
                 attenuationSteeringFactor = 0.4
@@ -502,7 +513,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
             timeOfLastUpdateForRateOfTurn = currentTime
         }
     }
-    func setupExplosion(node: SKSpriteNode, soundFX: Bool, file: String){
+    func setupExplosion(_ node: SKSpriteNode, soundFX: Bool, file: String){
         node.physicsBody?.velocity = CGVector(dx: (node.physicsBody?.velocity.dx)! * 0.5, dy: (node.physicsBody?.velocity.dy)! * 0.5)
         node.physicsBody?.categoryBitMask = 0x00000000
         node.physicsBody?.collisionBitMask = 0x00000000
@@ -521,23 +532,23 @@ class GameScene: SKScene,SKPhysicsContactDelegate{
             explosionFrames.append(atlas.textureNamed(explosionTextureName))
         }
         let soundAction = SKAction.playSoundFileNamed(file, waitForCompletion: true)
-        shipExplodes = SKAction.animateWithTextures(explosionFrames, timePerFrame: 0.03)
-        let waitAction = SKAction.waitForDuration(1.2)
+        shipExplodes = SKAction.animate(with: explosionFrames, timePerFrame: 0.03)
+        let waitAction = SKAction.wait(forDuration: 1.2)
         let removeAction = SKAction.removeFromParent()
         let group:[SKAction] = [soundAction, shipExplodes]
         let sequence:[SKAction] = [waitAction,removeAction]
         if !soundFX{
-            node.runAction(shipExplodes)
+            node.run(shipExplodes)
         }else{
-            node.runAction(SKAction.group(group))
+            node.run(SKAction.group(group))
         }
-        node.runAction(SKAction.sequence(sequence))
+        node.run(SKAction.sequence(sequence))
     }
     func removeBulletSounds(){
         var bullets:[SKNode]=[]
-        enumerateChildNodesWithName("bullet", usingBlock: {node, stop in bullets.append(node)})
+        enumerateChildNodes(withName: "bullet", using: {node, stop in bullets.append(node)})
         for bullet in bullets{
-            bullet.removeActionForKey("soundAction")
+            bullet.removeAction(forKey: "soundAction")
         }
     }
 }

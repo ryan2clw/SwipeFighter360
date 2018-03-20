@@ -35,7 +35,7 @@ class DestroyerScene: GameScene{
             rock.physicsBody!.categoryBitMask = rockCategory
             rock.physicsBody!.contactTestBitMask = bulletCategory
             rock.physicsBody!.collisionBitMask = edgeCategory | rockCategory | destroyerCategory
-            rock.physicsBody!.velocity = CGVectorMake(randomSpeed()*0.65,randomSpeed()*0.65)
+            rock.physicsBody!.velocity = CGVector(dx: randomSpeed()*0.65,dy: randomSpeed()*0.65)
         }
     }
     func addDestroyer(){
@@ -53,8 +53,8 @@ class DestroyerScene: GameScene{
         let maxY = destroyer.frame.height / 2.0
         let points = [CGPoint(x: minX, y: maxY / 5.0), CGPoint(x: 0, y: maxY),CGPoint(x: maxX, y: maxY/5.0), CGPoint(x: 0, y: minY),CGPoint(x: minX, y: maxY/5.0)]
         let destroyerShape:CGPath = assymetricalPolygonPath(points)
-        destroyer.physicsBody = SKPhysicsBody(polygonFromPath: destroyerShape)
-        destroyer.physicsBody?.dynamic = false
+        destroyer.physicsBody = SKPhysicsBody(polygonFrom: destroyerShape)
+        destroyer.physicsBody?.isDynamic = false
         destroyer.physicsBody?.allowsRotation = false
         destroyer.physicsBody?.affectedByGravity = false
         destroyer.physicsBody?.categoryBitMask = destroyerCategory
@@ -63,14 +63,14 @@ class DestroyerScene: GameScene{
         destroyer.physicsBody?.linearDamping = 0
         destroyer.physicsBody?.friction = 0
         destroyer.physicsBody?.usesPreciseCollisionDetection = true
-        let moveAction = SKAction.moveToY(-self.frame.height/2.0, duration: 9.0)
-        let waitAction = SKAction.waitForDuration(15.0)
+        let moveAction = SKAction.moveTo(y: -self.frame.height/2.0, duration: 9.0)
+        let waitAction = SKAction.wait(forDuration: 15.0)
         let removeAction = SKAction.removeFromParent()
         let actionSequence = [moveAction, waitAction, removeAction]
-        destroyer.runAction(SKAction.sequence(actionSequence))
+        destroyer.run(SKAction.sequence(actionSequence))
         self.addChild(destroyer)
     }
-    func newAsteroidPieces(location: CGPoint)->(){
+    func newAsteroidPieces(_ location: CGPoint)->(){
         let offset = sqrt(2.0)
         let locationRight = CGPoint(x: location.x+30,y: location.y)
         let locationLeft = CGPoint(x: location.x-30,y: location.y)
@@ -96,12 +96,12 @@ class DestroyerScene: GameScene{
             sprite.physicsBody?.categoryBitMask = rockCategory
             sprite.physicsBody?.contactTestBitMask = 0x00000000
             sprite.physicsBody?.collisionBitMask = edgeCategory | rockCategory | destroyerCategory
-            sprite.physicsBody?.velocity = CGVectorMake(randomSpeed(),randomSpeed())
+            sprite.physicsBody?.velocity = CGVector(dx: randomSpeed(),dy: randomSpeed())
             self.addChild(sprite)
         }
     }
     
-    func invaderAttack(currentTime: CFTimeInterval){
+    func invaderAttack(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 15.0) {
             addMonster()
             timeOfLastUpdateForInvaderAttack = currentTime
@@ -125,10 +125,10 @@ class DestroyerScene: GameScene{
         self.addChild(monster)
         let randomSpeed = drand48()*3+3
         let actionMove = SKAction.applyImpulse(CGVector(dx: -randomSpeed, dy:0) ,duration: 0.1)
-        let waitAction = SKAction.waitForDuration(10.0)
+        let waitAction = SKAction.wait(forDuration: 10.0)
         let removeAction = SKAction.removeFromParent()
         let sequence = [actionMove,waitAction,removeAction]
-        monster.runAction(SKAction.sequence(sequence))
+        monster.run(SKAction.sequence(sequence))
     }
     
     override func createContent() {
@@ -139,7 +139,7 @@ class DestroyerScene: GameScene{
             return
         }
         do{
-            backgroundAudio = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("rapTheme5", ofType: "mp3")!))
+            backgroundAudio = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "rapTheme5", ofType: "mp3")!))
             backgroundAudio.volume = 0.6
             backgroundAudio.numberOfLoops = -1
             backgroundAudio.currentTime = 2.0
@@ -150,12 +150,12 @@ class DestroyerScene: GameScene{
             return
         }
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("invader") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("invader") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "invader"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -171,7 +171,7 @@ class DestroyerScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("brownRock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("brownRock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "brownRock"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -187,7 +187,7 @@ class DestroyerScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
@@ -195,7 +195,7 @@ class DestroyerScene: GameScene{
             }
         }
         
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -211,7 +211,7 @@ class DestroyerScene: GameScene{
             }
         }
         
-        if ((nodeNames as NSArray).containsObject("destroyer") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("destroyer") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             //var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "destroyer"){
@@ -226,11 +226,11 @@ class DestroyerScene: GameScene{
             }else{
                 setupExplosion(explosion, soundFX: true, file: "shipExplodes.mp3")
             }*/
-            self.runAction(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
+            self.run(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
         }
 
         var location = CGPoint(x: 0, y: 0)
-        if ((nodeNames as NSArray).containsObject("rock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("rock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "rock"){
                 location = contact.bodyA.node!.position
@@ -253,18 +253,18 @@ class DestroyerScene: GameScene{
     
 // GAME ENDING
     
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         let superEnded = super.gameEnded(currentTime)  // super checks for ship
         var allRocks: [SKNode] = []
         // put nodes in array
-        self.enumerateChildNodesWithName("rock"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "rock"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
-        self.enumerateChildNodesWithName("red"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "red"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
-        self.enumerateChildNodesWithName("brownRock"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "brownRock"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
         // Check for the level up scenario
-        if let _ = childNodeWithName("ship"){
+        if let _ = childNode(withName: "ship"){
             if(allRocks.count == 0){
                 super.level = 601
                 self.level = 601
@@ -278,18 +278,18 @@ class DestroyerScene: GameScene{
         }
         return false
     }
-    func enemyFire(fighter: SKSpriteNode, angle: CGFloat){
-        let bullet = SKSpriteNode(color: UIColor.magentaColor(), size: CGSize(width: 3, height: 9))
-        bullet.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: bullet.frame.width, height: bullet.frame.height))
+    func enemyFire(_ fighter: SKSpriteNode, angle: CGFloat){
+        let bullet = SKSpriteNode(color: UIColor.magenta, size: CGSize(width: 3, height: 9))
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bullet.frame.width, height: bullet.frame.height))
         let bulletVelocity = CGVector(dx: cos(angle) * 350.0, dy: sin(angle) * 350.0)
         let bulletPosition = CGPoint(x:fighter.position.x ,y: fighter.position.y)
         //fighter.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
         //fighter.runAction(SKAction.rotateByAngle(CGFloat(angle), duration: 0.20))
         bullet.position = bulletPosition
-        bullet.runAction(SKAction.rotateByAngle(angle+(CGFloat(M_PI/2)), duration: 0.01))
+        bullet.run(SKAction.rotate(byAngle: angle+(CGFloat(M_PI/2)), duration: 0.01))
         bullet.name = "monsterBullet"
         bullet.physicsBody?.affectedByGravity = false
-        bullet.physicsBody?.dynamic = true
+        bullet.physicsBody?.isDynamic = true
         bullet.physicsBody?.mass = 0.01
         bullet.physicsBody?.linearDamping = 0
         bullet.physicsBody?.categoryBitMask = bulletCategory
@@ -297,13 +297,13 @@ class DestroyerScene: GameScene{
         bullet.physicsBody?.usesPreciseCollisionDetection = true
         bullet.physicsBody?.collisionBitMask = 0x00000000
         bullet.physicsBody?.fieldBitMask = 0x00000000
-        bullet.runAction(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
+        bullet.run(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
         bullet.physicsBody?.velocity = bulletVelocity
         self.addChild(bullet)
     }
 
     
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         initializeTimer(currentTime)
         // super updates user controls
         super.update(currentTime)
@@ -325,12 +325,12 @@ class DestroyerScene: GameScene{
                         updateAccuracy()
                         updateBestScore()
                         self.thisDelegate?.updateTransitionLevvel(self)
-                        self.paused = true
+                        self.isPaused = true
                         self.thisDelegate?.changeScene(self, command: "close")
                     }else{
                         self.highScore?.lives += 1
                         self.thisDelegate?.updateTransitionLevvel(self)
-                        scene?.paused = true
+                        scene?.isPaused = true
                         self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                     }
                 }
@@ -342,13 +342,13 @@ class DestroyerScene: GameScene{
         processContactsForUpdate(currentTime)
         updateRocksForRemoval(currentTime)
     }
-    func updateDestroyer(currentTime: CFTimeInterval){
+    func updateDestroyer(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForLevel > 10.0{
             addDestroyer()
             timeOfLastUpdateForLevel = currentTime
         }
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
             timeOfLastUpdateForInvaderAttack = currentTime

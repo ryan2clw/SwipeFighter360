@@ -260,6 +260,7 @@
 					A1F5E45E1C739B9700E6189A = {
 						CreatedOnToolsVersion = 7.2.1;
 						DevelopmentTeam = 35WYFGA6T2;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -463,6 +464,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -479,6 +481,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = SwipeFighter360.SwipeFighter360;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

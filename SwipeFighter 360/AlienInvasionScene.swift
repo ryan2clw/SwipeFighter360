@@ -22,10 +22,10 @@ class AlienInvasionScene: GameScene{
         if super.musicOff{
             return
         }
-        backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("fastTheme7", ofType: "mp3")!))
+        backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "fastTheme7", ofType: "mp3")!))
         super.playTheme(backgroundAudio, volume: 0.3)
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         initializeTimer(currentTime)
         super.updateDisplayAccuracy(currentTime)
         super.processUserMotionForUpdate(currentTime)
@@ -46,32 +46,32 @@ class AlienInvasionScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }
         }
         invaderAttack(currentTime)
     }
-    func invaderAttack(currentTime: CFTimeInterval){
+    func invaderAttack(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 0.50) {
             addMonster()
             timeOfLastUpdateForInvaderAttack = currentTime
             //super.processContactsForUpdate(currentTime)
         }
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
             timeOfLastUpdateForInvaderAttack = currentTime
         }
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -107,24 +107,24 @@ class AlienInvasionScene: GameScene{
         let randomSpeed = drand48()*3+3
         // Create the actions
         let actionMove = SKAction.applyImpulse(CGVector(dx: -randomSpeed, dy:0) ,duration: 0.1)
-        let waitAction = SKAction.waitForDuration(10.0)
+        let waitAction = SKAction.wait(forDuration: 10.0)
         let removeAction = SKAction.removeFromParent()
         let sequence = [actionMove,waitAction,removeAction]
-        monster.runAction(SKAction.sequence(sequence))
+        monster.run(SKAction.sequence(sequence))
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
                 contact.bodyB.node!.removeFromParent()
             }
         }
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -140,7 +140,7 @@ class AlienInvasionScene: GameScene{
             }
             
         }
-        if ((nodeNames as NSArray).containsObject("invader") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("invader") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "invader"){
@@ -158,13 +158,13 @@ class AlienInvasionScene: GameScene{
         }
     }
 
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         // super checks for ship, other endings are specific to level
         if super.gameEnded(currentTime){
             return true
         }
         timerLevelThree = currentTime - timeOfLastUpdateForLevel
-        let timer = childNodeWithName("timer") as! SKLabelNode
+        let timer = childNode(withName: "timer") as! SKLabelNode
         timer.text = "Timer: \(Int(timerLevelThree))"
         if timerLevelThree > 60.0{
             super.level = 801

@@ -35,11 +35,11 @@ class FourRockScene: GameScene{
             rock.physicsBody!.categoryBitMask = rockCategory
             rock.physicsBody!.contactTestBitMask = bulletCategory
             rock.physicsBody!.collisionBitMask = edgeCategory | rockCategory
-            rock.physicsBody!.velocity = CGVectorMake(randomSpeed()*0.8,randomSpeed()*0.8)
+            rock.physicsBody!.velocity = CGVector(dx: randomSpeed()*0.8,dy: randomSpeed()*0.8)
         }
     }
     
-    func newAsteroidPieces(location: CGPoint)->(){
+    func newAsteroidPieces(_ location: CGPoint)->(){
         let offset = sqrt(2.0)
         let locationRight = CGPoint(x: location.x+30,y: location.y)
         let locationLeft = CGPoint(x: location.x-30,y: location.y)
@@ -65,12 +65,12 @@ class FourRockScene: GameScene{
             sprite.physicsBody?.categoryBitMask = rockCategory
             sprite.physicsBody?.contactTestBitMask = 0x00000000
             sprite.physicsBody?.collisionBitMask = edgeCategory | rockCategory
-            sprite.physicsBody?.velocity = CGVectorMake(randomSpeed(),randomSpeed())
+            sprite.physicsBody?.velocity = CGVector(dx: randomSpeed(),dy: randomSpeed())
             self.addChild(sprite)
         }
     }
     
-    func invaderAttack(currentTime: CFTimeInterval){
+    func invaderAttack(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 15.0) {
             addMonster()
             timeOfLastUpdateForInvaderAttack = currentTime
@@ -102,10 +102,10 @@ class FourRockScene: GameScene{
         let randomSpeed = drand48()*3+3
         // Create the actions
         let actionMove = SKAction.applyImpulse(CGVector(dx: -randomSpeed, dy:0) ,duration: 0.1)
-        let waitAction = SKAction.waitForDuration(10.0)
+        let waitAction = SKAction.wait(forDuration: 10.0)
         let removeAction = SKAction.removeFromParent()
         let sequence = [actionMove,waitAction,removeAction]
-        monster.runAction(SKAction.sequence(sequence))
+        monster.run(SKAction.sequence(sequence))
     }
     
     override func createContent() {
@@ -116,7 +116,7 @@ class FourRockScene: GameScene{
             return
         }
         do{
-            backgroundAudio = try AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("technoTheme3", ofType: "mp3")!))
+            backgroundAudio = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "technoTheme3", ofType: "mp3")!))
             backgroundAudio.currentTime = 30.0
             backgroundAudio.numberOfLoops = -1
             backgroundAudio.volume = 0.6
@@ -125,13 +125,13 @@ class FourRockScene: GameScene{
             print("AudioPlayer Failure")
         }
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
         var location = CGPoint(x: 0, y: 0)
-        if ((nodeNames as NSArray).containsObject("rock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("rock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "rock"){
                 location = contact.bodyA.node!.position
@@ -150,7 +150,7 @@ class FourRockScene: GameScene{
             monstersHit += 1
             newAsteroidPieces(location)
         }
-        if ((nodeNames as NSArray).containsObject("brownRock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("brownRock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "brownRock"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -166,7 +166,7 @@ class FourRockScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
@@ -174,7 +174,7 @@ class FourRockScene: GameScene{
             }
         }
         
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -189,7 +189,7 @@ class FourRockScene: GameScene{
                 setupExplosion(explosion, soundFX: true, file:"shipExplodes.mp3")
             }
         }
-        if ((nodeNames as NSArray).containsObject("invader") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("invader") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "invader"){
@@ -207,18 +207,18 @@ class FourRockScene: GameScene{
         }
     }
 
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         let superEnded = super.gameEnded(currentTime)  // super checks for ship
         var allRocks: [SKNode] = []
         // put nodes in array
-        self.enumerateChildNodesWithName("rock"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "rock"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
-        self.enumerateChildNodesWithName("red"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "red"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
-        self.enumerateChildNodesWithName("brownRock"){// <--FIND ROCKS HERE
+        self.enumerateChildNodes(withName: "brownRock"){// <--FIND ROCKS HERE
             node, stop in allRocks.append(node)}
         // Check for the level up scenario
-        if let _ = childNodeWithName("ship"){
+        if let _ = childNode(withName: "ship"){
             if(allRocks.count == 0){
                 super.level = 401
                 highScore?.level = 401
@@ -232,7 +232,7 @@ class FourRockScene: GameScene{
         return false
     }
     
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         // super updates user controls
         super.update(currentTime)
         // gameEnds accounts for super
@@ -251,12 +251,12 @@ class FourRockScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }

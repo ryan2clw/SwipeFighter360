@@ -8,6 +8,26 @@
 
 import SpriteKit
 import AVFoundation
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class SettingsScene: GameScene {
     
@@ -16,21 +36,21 @@ class SettingsScene: GameScene {
     
     func addExitButton(){
         let exitButton = UIButton(frame: CGRect(x: self.size.width - 90, y: 0, width: 90, height: 90))
-        exitButton.backgroundColor = UIColor.clearColor()
-        exitButton.setTitle("EXIT", forState: UIControlState.Normal)
-        exitButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), forState: UIControlState.Normal)
-        exitButton.addTarget(self, action: #selector(SettingsScene.exitAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+        exitButton.backgroundColor = UIColor.clear
+        exitButton.setTitle("EXIT", for: UIControlState())
+        exitButton.setTitleColor(UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), for: UIControlState())
+        exitButton.addTarget(self, action: #selector(SettingsScene.exitAction(_:)), for: UIControlEvents.touchDown)
         self.view!.addSubview(exitButton)
     }
-    func addSwitch(selector: Selector, x: Double, y: Double, on: Bool){
+    func addSwitch(_ selector: Selector, x: Double, y: Double, on: Bool){
         let selectorSwitch = UISwitch(frame: CGRect(x: x, y: y, width: 120, height: 120))
         if on{
-            selectorSwitch.on = true
+            selectorSwitch.isOn = true
         }else{
-            selectorSwitch.on = false
+            selectorSwitch.isOn = false
         }
-        selectorSwitch.backgroundColor = UIColor.clearColor()
-        selectorSwitch.addTarget(self, action: selector, forControlEvents: UIControlEvents.ValueChanged)
+        selectorSwitch.backgroundColor = UIColor.clear
+        selectorSwitch.addTarget(self, action: selector, for: UIControlEvents.valueChanged)
         if selector == #selector(SettingsScene.resetAction(_:)){
             resetSwitch = selectorSwitch
             self.view!.addSubview(selectorSwitch)
@@ -51,7 +71,7 @@ class SettingsScene: GameScene {
         }
     }
     
-    func addNewLabel(title: String, x: Double, y: Double, font: CGFloat, color: UIColor, alignment:SKLabelHorizontalAlignmentMode ){
+    func addNewLabel(_ title: String, x: Double, y: Double, font: CGFloat, color: UIColor, alignment:SKLabelHorizontalAlignmentMode ){
         let myLabel = SKLabelNode(fontNamed:"Chalkduster")
         myLabel.horizontalAlignmentMode = alignment  //.Left
         myLabel.text = title
@@ -65,7 +85,7 @@ class SettingsScene: GameScene {
         var y = Double(self.frame.height*0.84)
         for i in 0 ... 3 {
             let names:[String]=["Music", "Lazers", "Explosions", "Start Over"]
-            addNewLabel(names[i], x: Double(self.frame.width) / 5.2, y: y, font: 35, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .Left)
+            addNewLabel(names[i], x: Double(self.frame.width) / 5.2, y: y, font: 35, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .left)
             y -= Double(self.frame.height/7)
         }
     }
@@ -78,16 +98,16 @@ class SettingsScene: GameScene {
         addExitButton()
         addSwitches()
         addSwitch(#selector(SettingsScene.swipeMode(_:)), x: Double(self.frame.width) * 0.6, y: Double(self.frame.height)*0.25, on: self.swipeMode)
-        addNewLabel("Swipe Mode", x: Double(self.frame.width) * 0.69, y: Double(self.frame.height)*0.68, font: 30, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .Left)
+        addNewLabel("Swipe Mode", x: Double(self.frame.width) * 0.69, y: Double(self.frame.height)*0.68, font: 30, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .left)
         addLabels()
         displayHighestLevel()
         super.contentCreated = true
     }
 
-    func exitAction(sender: UIButton!){
+    func exitAction(_ sender: UIButton!){
         self.thisDelegate?.gameSceneDidFinish(self, command: "close")
     }
-    func swipeMode(sender: UIButton!){
+    func swipeMode(_ sender: UIButton!){
         if swipeMode == false{
             swipeMode = true
         }else{
@@ -95,7 +115,7 @@ class SettingsScene: GameScene {
         }
         self.thisDelegate?.updateTransitionLevvel(self)
     }
-    func musicOffAction(sender: UIButton!){
+    func musicOffAction(_ sender: UIButton!){
         if musicOff == false{
             musicOff = true
         }else{
@@ -103,7 +123,7 @@ class SettingsScene: GameScene {
         }
         self.thisDelegate?.updateTransitionLevvel(self)
     }
-    func lazerOffAction(sender: UIButton!){
+    func lazerOffAction(_ sender: UIButton!){
         if lazerOff == false{
             lazerOff = true
         }else{
@@ -111,7 +131,7 @@ class SettingsScene: GameScene {
         }
         self.thisDelegate?.updateTransitionLevvel(self)
     }
-    func explosionOffAction(sender: UIButton!){
+    func explosionOffAction(_ sender: UIButton!){
         if explosionOff == false{
             explosionOff = true
         }else{
@@ -119,7 +139,7 @@ class SettingsScene: GameScene {
         }
         self.thisDelegate?.updateTransitionLevvel(self)
     }
-    func resetAction(sender: UIButton!){
+    func resetAction(_ sender: UIButton!){
         level = 1
         self.highScore! = HighScore(name: "Player 1", lives: 1, accuracy: 0.0, level: 0)!
         //self.bestScore! = HighScore(name: "Player 1", lives: 1, accuracy: 0.0, level: 0)!
@@ -128,16 +148,16 @@ class SettingsScene: GameScene {
     func updateResetHiddenStatus(){
         if resetSwitch != nil{
             if level == 1{
-                if let label = childNodeWithName("Start Over") as? SKLabelNode{
+                if let label = childNode(withName: "Start Over") as? SKLabelNode{
                     label.text = "Level One"
                 }
-                resetSwitch.hidden = true
+                resetSwitch.isHidden = true
             }else{
-                resetSwitch.hidden = false
+                resetSwitch.isHidden = false
             }
         }
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         if currentTime - timeOfLastUpdateForGameReset > 0.5{
             if self.level != 12{
                 updateResetHiddenStatus()
@@ -178,9 +198,9 @@ class SettingsScene: GameScene {
                     names = ["Current Game",  "Level:     \(highScore!.level)", "Lives:     \(highScore!.lives)", accuracyString]
                 }
                 if j > 0 {
-                    addNewLabel(names[j], x: x, y: y, font: 25, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .Left)
+                    addNewLabel(names[j], x: x, y: y, font: 25, color: UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0), alignment: .left)
                 }else{
-                    addNewLabel(names[j], x: x, y: y, font: 30, color: UIColor.whiteColor(), alignment: .Left)
+                    addNewLabel(names[j], x: x, y: y, font: 30, color: UIColor.white, alignment: .left)
                     x += Double(self.frame.width)*0.05
                 }
                 y -= Double(self.frame.height*0.08)

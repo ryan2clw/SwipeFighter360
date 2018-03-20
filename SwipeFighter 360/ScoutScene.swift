@@ -20,7 +20,7 @@ class ScoutScene: GameScene{
     var timerLevelTwo = 0.0
    // var backgroundAudio:AVAudioPlayer!// = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dannyDopeBeat4", ofType: "mp3")!))
     
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         asteroidField(currentTime)
         invaderEnters(currentTime)
@@ -29,14 +29,14 @@ class ScoutScene: GameScene{
         processContactsForUpdate(currentTime)
         gameEnds = gameEnded(currentTime)
         if gameEnds == true{
-            if let _ = childNodeWithName("timer"){
-                let timerLabel = childNodeWithName("timer") as! SKLabelNode
+            if let _ = childNode(withName: "timer"){
+                let timerLabel = childNode(withName: "timer") as! SKLabelNode
                 timerLabel.text = "DONE"
             }
             motionManager.stopAccelerometerUpdates()
             var allScouts: [SKSpriteNode] = []
             // put nodes in array
-            self.enumerateChildNodesWithName("monster"){// <--FIND ROCKS HERE
+            self.enumerateChildNodes(withName: "monster"){// <--FIND ROCKS HERE
                 node, stop in allScouts.append(node as! SKSpriteNode)}
             for scout in allScouts{
                 // Strong Reference eliminated from runBlock
@@ -53,31 +53,31 @@ class ScoutScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }
         }
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
             timeOfLastUpdateForInvaderEntrance = currentTime
             timeOfLastUpdateForInvaderAttack = currentTime
         }
     }
-    func invaderEnters(currentTime: CFTimeInterval){
+    func invaderEnters(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderEntrance > 10.0) {
             addMonster()
             timeOfLastUpdateForInvaderEntrance = currentTime
         }
     }
-    func invaderAttack(currentTime: CFTimeInterval){
+    func invaderAttack(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 0.6) {
             monsterFire(monsterAim())
             timeOfLastUpdateForInvaderAttack = currentTime
@@ -86,8 +86,8 @@ class ScoutScene: GameScene{
 
     func monsterAim()->(CGVector, CGFloat){
 // rotate monster to face ship
-        if let ship = childNodeWithName("ship"){
-            if let monster = childNodeWithName("monster"){
+        if let ship = childNode(withName: "ship"){
+            if let monster = childNode(withName: "monster"){
 // if the ship is right of the monster, ie quadrants I and IV, add 90 to the angle
                 let dx = ship.position.x - monster.position.x
                 let dy = ship.position.y - monster.position.y
@@ -104,16 +104,16 @@ class ScoutScene: GameScene{
     return (CGVector(dx: 0, dy: 0),0)
     }
 
-    func monsterFire(trigTuple: (CGVector, CGFloat)){
+    func monsterFire(_ trigTuple: (CGVector, CGFloat)){
 
-        if let monster = self.childNodeWithName("monster"){
+        if let monster = self.childNode(withName: "monster"){
             if monster.position.x < self.frame.width / 2.5 {
-                let bullet = SKSpriteNode(color: UIColor.magentaColor(), size: CGSize(width: 3, height: 9))
-                bullet.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: bullet.frame.width, height: bullet.frame.height))
+                let bullet = SKSpriteNode(color: UIColor.magenta, size: CGSize(width: 3, height: 9))
+                bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bullet.frame.width, height: bullet.frame.height))
                 let bulletVelocity = CGVector(dx: trigTuple.0.dx * 300.0, dy: trigTuple.0.dy * 300.0)
                 let bulletPosition = CGPoint(x:monster.position.x ,y: monster.position.y)
                 monster.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
-                if let ship = childNodeWithName("ship"){
+                if let ship = childNode(withName: "ship"){
                     if ship.position.x > monster.position.x{
                         if ship.position.y > monster.position.y{
                             monsterAngle -= M_PI
@@ -122,12 +122,12 @@ class ScoutScene: GameScene{
                         }
                     }
                 }
-                monster.runAction(SKAction.rotateByAngle(CGFloat(monsterAngle), duration: 0.20))
+                monster.run(SKAction.rotate(byAngle: CGFloat(monsterAngle), duration: 0.20))
                 bullet.position = bulletPosition
-                bullet.runAction(SKAction.rotateByAngle(CGFloat(monsterAngle+M_PI/2), duration: 0.01))
+                bullet.run(SKAction.rotate(byAngle: CGFloat(monsterAngle+M_PI/2), duration: 0.01))
                 bullet.name = "monsterBullet"
                 bullet.physicsBody?.affectedByGravity = false
-                bullet.physicsBody?.dynamic = true
+                bullet.physicsBody?.isDynamic = true
                 bullet.physicsBody?.mass = 0.01
                 bullet.physicsBody?.linearDamping = 0
                 bullet.physicsBody?.categoryBitMask = bulletCategory
@@ -135,14 +135,14 @@ class ScoutScene: GameScene{
                 bullet.physicsBody?.usesPreciseCollisionDetection = true
                 bullet.physicsBody?.collisionBitMask = 0x00000000
                 bullet.physicsBody?.fieldBitMask = 0x00000000
-                bullet.runAction(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
+                bullet.run(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
                 bullet.physicsBody?.velocity = bulletVelocity
                 self.addChild(bullet)
                 monster.name = "monsterSpent"
             }
         }
     }
-    func asteroidField(currentTime: CFTimeInterval){
+    func asteroidField(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForAsteroidField > 2.0 {
             let rock = SKSpriteNode(imageNamed: "brownRock")
             rock.name = "brownRock"
@@ -158,7 +158,7 @@ class ScoutScene: GameScene{
             rock.physicsBody?.mass = 0.1
             rock.physicsBody?.linearDamping = 0
             rock.physicsBody?.restitution = 1.0
-            let waitAction = SKAction.waitForDuration(10.0)
+            let waitAction = SKAction.wait(forDuration: 10.0)
             let removeAction = SKAction.removeFromParent()
             // pick random side and pass in position and velocity
             let randomSide = arc4random_uniform(4)
@@ -216,13 +216,13 @@ class ScoutScene: GameScene{
             let sequence = [actionMove,waitAction,removeAction]
             // add rocks and let er rip
             self.addChild(rock)
-            rock.runAction(SKAction.sequence(sequence))
+            rock.run(SKAction.sequence(sequence))
             timeOfLastUpdateForAsteroidField = currentTime
         }
     }
     
-    func createGravityField(strength: vector_float3){
-        let gravityNode = SKFieldNode.linearGravityFieldWithVector(strength)
+    func createGravityField(_ strength: vector_float3){
+        let gravityNode = SKFieldNode.linearGravityField(withVector: strength)
         
         if strength.x > 0{
             gravityNode.categoryBitMask = rightFieldCategory
@@ -238,7 +238,7 @@ class ScoutScene: GameScene{
         }
         self.addChild(gravityNode)
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -248,13 +248,13 @@ class ScoutScene: GameScene{
         myLabel.alpha = 0.9
         self.addChild(myLabel)
     }
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         // super checks for ship, other endings are specific to level
         if super.gameEnded(currentTime){
             return true
         }
         timerLevelTwo = currentTime - timeOfLastUpdateForLevel
-        let timer = childNodeWithName("timer") as! SKLabelNode
+        let timer = childNode(withName: "timer") as! SKLabelNode
         timer.text = "Timer: \(Int(timerLevelTwo))"
         if timerLevelTwo > 60.0{
             super.level = 501
@@ -273,7 +273,7 @@ class ScoutScene: GameScene{
         if super.musicOff{
             return
         }
-        backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dannyDopeBeat4", ofType: "mp3")!))
+        backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "dannyDopeBeat4", ofType: "mp3")!))
         backgroundAudio.currentTime = 10.0
         backgroundAudio.numberOfLoops = -1
         backgroundAudio.volume = 0.3
@@ -297,30 +297,30 @@ class ScoutScene: GameScene{
         self.addChild(monster)
         let randomSpeed = drand48()+2
         func monsterLeave()->(){
-            monster.physicsBody!.velocity = CGVectorMake(CGFloat(cos(monsterAngle+M_PI) * 300.0), CGFloat(sin(monsterAngle+M_PI) * 300.0))
+            monster.physicsBody!.velocity = CGVector(dx: CGFloat(cos(monsterAngle+M_PI) * 300.0), dy: CGFloat(sin(monsterAngle+M_PI) * 300.0))
         }
         let moveAction = SKAction.applyImpulse(CGVector(dx: -randomSpeed, dy:0) ,duration: 0.1)
-        let waitAction = SKAction.waitForDuration(5.0)
+        let waitAction = SKAction.wait(forDuration: 5.0)
         let removeAction = SKAction.removeFromParent()
-        let exitAction = SKAction.runBlock(monsterLeave)
+        let exitAction = SKAction.run(monsterLeave)
         let sequence = [moveAction, waitAction, exitAction, waitAction, removeAction]
-        monster.runAction(SKAction.sequence(sequence), withKey: "strongReference")
+        monster.run(SKAction.sequence(sequence), withKey: "strongReference")
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("monster") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("monster") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "monster"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
-                explosion.removeActionForKey("strongReference")
+                explosion.removeAction(forKey: "strongReference")
                 explosion.name = "monsterSpent"
                 contact.bodyB.node!.removeFromParent()
             } else{
                 explosion = contact.bodyB.node! as! SKSpriteNode
-                explosion.removeActionForKey("strongReference")
+                explosion.removeAction(forKey: "strongReference")
                 explosion.name = "monsterSpent"
                 contact.bodyA.node!.removeFromParent()
             }
@@ -331,7 +331,7 @@ class ScoutScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("brownRock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("brownRock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "brownRock"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -347,7 +347,7 @@ class ScoutScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
@@ -355,7 +355,7 @@ class ScoutScene: GameScene{
             }
         }
         
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -371,7 +371,7 @@ class ScoutScene: GameScene{
             }
         }
 
-        if ((nodeNames as NSArray).containsObject("monsterSpent") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("monsterSpent") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "monsterSpent"){

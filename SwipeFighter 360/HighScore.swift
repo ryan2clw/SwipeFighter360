@@ -28,9 +28,9 @@ class HighScore: NSObject, NSCoding {
     }
     // MARK: Archiving Paths
     
-    static let DocumentsDirectory:NSURL = NSFileManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-    static let ArchiveURL:NSURL = DocumentsDirectory.URLByAppendingPathComponent("HighScore")
-    static let ArchiveURL2:NSURL = DocumentsDirectory.URLByAppendingPathComponent("BestScore")
+    static let DocumentsDirectory:URL = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
+    static let ArchiveURL:URL = DocumentsDirectory.appendingPathComponent("HighScore")
+    static let ArchiveURL2:URL = DocumentsDirectory.appendingPathComponent("BestScore")
     
     // MARK: Initialization
     
@@ -51,21 +51,21 @@ class HighScore: NSObject, NSCoding {
     
     // MARK: NSCoding
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(name, forKey: PropertyKey.nameKey)
-        aCoder.encodeInteger(lives, forKey: PropertyKey.livesKey)
-        aCoder.encodeDouble(accuracy, forKey: PropertyKey.accuracyKey)
-        aCoder.encodeInteger(level, forKey: PropertyKey.levelKey)
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(name, forKey: PropertyKey.nameKey)
+        aCoder.encode(lives, forKey: PropertyKey.livesKey)
+        aCoder.encode(accuracy, forKey: PropertyKey.accuracyKey)
+        aCoder.encode(level, forKey: PropertyKey.levelKey)
     }
     
     required convenience init?(coder aDecoder: NSCoder) {
-        let name = aDecoder.decodeObjectForKey(PropertyKey.nameKey) as! String
+        let name = aDecoder.decodeObject(forKey: PropertyKey.nameKey) as! String
         
-        let lives = aDecoder.decodeIntegerForKey(PropertyKey.livesKey)
+        let lives = aDecoder.decodeInteger(forKey: PropertyKey.livesKey)
         
-        let accuracy = aDecoder.decodeDoubleForKey(PropertyKey.accuracyKey)
+        let accuracy = aDecoder.decodeDouble(forKey: PropertyKey.accuracyKey)
         
-        let level = aDecoder.decodeIntegerForKey(PropertyKey.levelKey)
+        let level = aDecoder.decodeInteger(forKey: PropertyKey.levelKey)
         // Must call designated initializer.
         self.init(name: name, lives: lives, accuracy: accuracy, level: level)
     }

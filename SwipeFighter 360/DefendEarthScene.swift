@@ -35,13 +35,13 @@ class DefendEarthScene: GameScene{
         if super.musicOff{
             return
         }
-        backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("happyTheme6", ofType: "mp3")!))
+        backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "happyTheme6", ofType: "mp3")!))
         super.playTheme(backgroundAudio, volume: 0.3)
     }
     
     override func addShip() {
         let ship = SKSpriteNode(imageNamed:"newShip")
-        ship.position = CGPoint(x:CGRectGetMidX(self.frame)/2.0, y:CGRectGetMidY(self.frame)/2.0)
+        ship.position = CGPoint(x:self.frame.midX/2.0, y:self.frame.midY/2.0)
         self.addChild(ship)
         ship.name = "ship"
         ship.physicsBody = SKPhysicsBody(circleOfRadius: ship.size.width/2)
@@ -64,7 +64,7 @@ class DefendEarthScene: GameScene{
         self.addChild(earth)
         earth.physicsBody = SKPhysicsBody(circleOfRadius: earth.frame.width/2.2)
         earth.physicsBody?.affectedByGravity = false
-        earth.physicsBody?.dynamic = false
+        earth.physicsBody?.isDynamic = false
         earth.physicsBody?.fieldBitMask = 0x00000000
         earth.physicsBody?.friction = 0
         earth.physicsBody?.allowsRotation = false
@@ -78,7 +78,7 @@ class DefendEarthScene: GameScene{
         earth.addChild(gravity)
     }
     
-    func asteroidField(currentTime: CFTimeInterval){
+    func asteroidField(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForAsteroidField > 3.0 {
             let rock = SKSpriteNode(imageNamed: "brownRock")
             rock.name = "brownRock"
@@ -94,7 +94,7 @@ class DefendEarthScene: GameScene{
             rock.physicsBody?.mass = 0.1
             rock.physicsBody?.linearDamping = 0
             rock.physicsBody?.restitution = 1.0
-            let waitAction = SKAction.waitForDuration(10.0)
+            let waitAction = SKAction.wait(forDuration: 10.0)
             let removeAction = SKAction.removeFromParent()
             // pick random side and pass in position and velocity
             let randomSide = arc4random_uniform(4)
@@ -152,18 +152,18 @@ class DefendEarthScene: GameScene{
             let sequence = [actionMove,waitAction,removeAction]
             // add rocks and let er rip
             self.addChild(rock)
-            rock.runAction(SKAction.sequence(sequence))
+            rock.run(SKAction.sequence(sequence))
             timeOfLastUpdateForAsteroidField = currentTime
         }
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
         }
     }
     
-    func createGravityField(strength: vector_float3){
-        let gravityNode = SKFieldNode.linearGravityFieldWithVector(strength)
+    func createGravityField(_ strength: vector_float3){
+        let gravityNode = SKFieldNode.linearGravityField(withVector: strength)
         
         if strength.x > 0{
             gravityNode.categoryBitMask = rightFieldCategory
@@ -179,12 +179,12 @@ class DefendEarthScene: GameScene{
         }
         self.addChild(gravityNode)
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("brownRock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("brownRock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "brownRock"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -200,14 +200,14 @@ class DefendEarthScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
                 contact.bodyB.node!.removeFromParent()
             }
         }
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -223,7 +223,7 @@ class DefendEarthScene: GameScene{
             }
             
         }
-        if ((nodeNames as NSArray).containsObject("earth") && (nodeNames as NSArray).containsObject("brownRock")){
+        if ((nodeNames as NSArray).contains("earth") && (nodeNames as NSArray).contains("brownRock")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "earth"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -239,7 +239,7 @@ class DefendEarthScene: GameScene{
             }
         }
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -249,15 +249,15 @@ class DefendEarthScene: GameScene{
         myLabel.alpha = 0.9
         self.addChild(myLabel)
     }
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         // super checks for ship, other endings are specific to level
         if super.gameEnded(currentTime){
             return true
         }
         timerLevelTwo = currentTime - timeOfLastUpdateForLevel
-        let timer = childNodeWithName("timer") as! SKLabelNode
+        let timer = childNode(withName: "timer") as! SKLabelNode
         timer.text = "Timer: \(Int(timerLevelTwo))"
-        let earth = childNodeWithName("earth")
+        let earth = childNode(withName: "earth")
         if earth == nil{
             return true
         }
@@ -268,13 +268,13 @@ class DefendEarthScene: GameScene{
         }
         return false
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         initializeTimer(currentTime)
         super.update(currentTime)
         gameEnds = gameEnded(currentTime)
         if gameEnds == true{
-            if let _ = childNodeWithName("timer"){
-                let timerLabel = childNodeWithName("timer") as! SKLabelNode
+            if let _ = childNode(withName: "timer"){
+                let timerLabel = childNode(withName: "timer") as! SKLabelNode
                 timerLabel.text = "DONE"
             }
             motionManager.stopAccelerometerUpdates()
@@ -289,12 +289,12 @@ class DefendEarthScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }

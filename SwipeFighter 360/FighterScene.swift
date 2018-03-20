@@ -29,16 +29,16 @@ class FighterScene: GameScene{
         if super.musicOff{
             return
         }
-        backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("gangstaTheme8", ofType: "mp3")!))
+        backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "gangstaTheme8", ofType: "mp3")!))
         super.playTheme(backgroundAudio, volume: 0.4)
     }
-    func asteroidField(currentTime: CFTimeInterval){
+    func asteroidField(_ currentTime: CFTimeInterval){
         // replaced asteroids with fighters, pardon the misnomers
         if currentTime - timeOfLastUpdateForAsteroidField > 6.0 {
             var allRocks:[SKSpriteNode]=[]
-            self.enumerateChildNodesWithName("rock"){// <--FIND ROCKS HERE
+            self.enumerateChildNodes(withName: "rock"){// <--FIND ROCKS HERE
                 node, stop in allRocks.append(node as! SKSpriteNode)}
-            self.enumerateChildNodesWithName("brownRock"){// <--FIND ROCKS HERE
+            self.enumerateChildNodes(withName: "brownRock"){// <--FIND ROCKS HERE
                 node, stop in allRocks.append(node as! SKSpriteNode)}
             if allRocks.count < 4{
                 let rock:FighterNode = FighterNode(imageNamed: "fighter2")
@@ -63,7 +63,7 @@ class FighterScene: GameScene{
                 let actualY = arc4random_uniform(UInt32(maxInt-minInt))
                 let randomSpeed = drand48()+2
                 var moveAction = SKAction.applyImpulse(CGVector(dx: 0, dy: 0), duration: 0.1)
-                var rotateAction = SKAction.rotateByAngle(0, duration: 0.1)
+                var rotateAction = SKAction.rotate(byAngle: 0, duration: 0.1)
                 // Rocks curve toward center, field category depends on entry location
                 // asteroid from left
                 if randomSide == 0 {
@@ -75,7 +75,7 @@ class FighterScene: GameScene{
                 if randomSide == 1 {
                     rock.position = CGPoint(x: -rock.size.width/2, y: CGFloat(actualY))
                     moveAction = SKAction.applyImpulse(CGVector(dx: 2.0 * randomSpeed, dy:0) ,duration: 0.1)
-                    rotateAction = SKAction.rotateByAngle(CGFloat(M_PI), duration: 0.1)
+                    rotateAction = SKAction.rotate(byAngle: CGFloat(M_PI), duration: 0.1)
                     rock.angle = 0
                 }
                 // asteroid from above
@@ -83,7 +83,7 @@ class FighterScene: GameScene{
                 maxInt = Int(self.size.width-rock.size.width/2)
                 let actualX = arc4random_uniform(UInt32(maxInt-minInt))
                 if randomSide == 2{
-                    rotateAction = SKAction.rotateByAngle(CGFloat(M_PI/2.0), duration: 0.1)
+                    rotateAction = SKAction.rotate(byAngle: CGFloat(M_PI/2.0), duration: 0.1)
                     rock.angle = CGFloat(-M_PI/2.0)
                     rock.position = CGPoint(x: CGFloat(actualX), y: self.size.height+rock.size.height/2)
                     moveAction = SKAction.applyImpulse(CGVector(dx: 0, dy: -2.0 * randomSpeed) ,duration: 0.1)
@@ -92,7 +92,7 @@ class FighterScene: GameScene{
                 // asteroid from below
                 if randomSide == 3{
                     rock.position = CGPoint(x: CGFloat(actualX), y: -rock.size.width/2)
-                    rotateAction = SKAction.rotateByAngle(CGFloat(-M_PI/2.0), duration: 0.1)
+                    rotateAction = SKAction.rotate(byAngle: CGFloat(-M_PI/2.0), duration: 0.1)
                     rock.angle = CGFloat(M_PI/2.0)
                     moveAction = SKAction.applyImpulse(CGVector(dx: 0, dy:3.0 * randomSpeed) ,duration: 0.1)
                 }
@@ -100,31 +100,31 @@ class FighterScene: GameScene{
                 let sequence = [rotateAction, moveAction]
                 // add rocks and let er rip
                 self.addChild(rock)
-                rock.runAction(SKAction.sequence(sequence))
+                rock.run(SKAction.sequence(sequence))
                 timeOfLastUpdateForAsteroidField = currentTime
             }
         }
     }
 
 
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
         }
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
                 contact.bodyB.node!.removeFromParent()
             }
         }
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -140,7 +140,7 @@ class FighterScene: GameScene{
             }
             
         }
-        if ((nodeNames as NSArray).containsObject("monster") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("monster") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "monster"){
@@ -175,7 +175,7 @@ class FighterScene: GameScene{
             }
         }*/
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -185,14 +185,14 @@ class FighterScene: GameScene{
         myLabel.alpha = 0.9
         self.addChild(myLabel)
     }
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         if currentTime - timeOfLastUpdateForGameEnding > 0.3{
             // super checks for ship, other endings are specific to level
             if super.gameEnded(currentTime){
                 return true
             }
             timerLevelTwo = currentTime - timeOfLastUpdateForLevel
-            let timer = childNodeWithName("timer") as! SKLabelNode
+            let timer = childNode(withName: "timer") as! SKLabelNode
             timer.text = "Timer: \(Int(timerLevelTwo))"
             if timerLevelTwo > 60.0{
                 super.level = 901
@@ -204,12 +204,12 @@ class FighterScene: GameScene{
     return false
     }
     
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         initializeTimer(currentTime)
         super.update(currentTime)
         gameEnds = gameEnded(currentTime)
         if gameEnds == true{
-            if let timerLabel = childNodeWithName("timer") as? SKLabelNode{
+            if let timerLabel = childNode(withName: "timer") as? SKLabelNode{
                 timerLabel.text = "DONE"
             }
             motionManager.stopAccelerometerUpdates()
@@ -225,12 +225,12 @@ class FighterScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }
@@ -241,21 +241,21 @@ class FighterScene: GameScene{
         updateEnemyFire(currentTime)
     }
 
-    func updateAimMoveFighter(currentTime: CFTimeInterval){
+    func updateAimMoveFighter(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 0.2) {
             aimFighters()
             timeOfLastUpdateForInvaderAttack = currentTime
         }
     }
     func gatherFighters(){
-        self.enumerateChildNodesWithName("monster"){
+        self.enumerateChildNodes(withName: "monster"){
             node, stop in self.fighters.append(node as! FighterNode)}
 
     }
-    func updateEnemyFire(currentTime: CFTimeInterval){
+    func updateEnemyFire(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForEnemeyFire > 1.0) {
             gatherFighters()
-            if let ship = childNodeWithName("ship"){
+            if let ship = childNode(withName: "ship"){
                 for fighter in fighters{
                     let dx = fighter.position.x - ship.position.x
                     let dy = fighter.position.y - ship.position.y
@@ -273,7 +273,7 @@ class FighterScene: GameScene{
     func aimFighters()->(){
         gatherFighters()
         // Finds absolute heading from fighter to ship
-            if let ship = childNodeWithName("ship"){
+            if let ship = childNode(withName: "ship"){
             for fighter in fighters{
                 let dx = ship.position.x - fighter.position.x
                 let dy = ship.position.y - fighter.position.y
@@ -293,27 +293,27 @@ class FighterScene: GameScene{
                 while difference < CGFloat(-M_PI){
                     difference += CGFloat(2.0*M_PI)
                 }
-                fighter.runAction(SKAction.rotateByAngle(difference, duration: 0.2))
+                fighter.run(SKAction.rotate(byAngle: difference, duration: 0.2))
                 let magnitude:CGFloat = 1.0
                 let vector = CGVector(dx: magnitude*cos(fighter.angle), dy: magnitude*sin(fighter.angle))
-                fighter.runAction(SKAction.applyImpulse(vector, duration: 0.1))
+                fighter.run(SKAction.applyImpulse(vector, duration: 0.1))
             }
         self.fighters = []
         }
     }
 
-    func enemyFire(fighter: SKSpriteNode, angle: CGFloat){
-        let bullet = SKSpriteNode(color: UIColor.magentaColor(), size: CGSize(width: 3, height: 9))
-        bullet.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: bullet.frame.width, height: bullet.frame.height))
+    func enemyFire(_ fighter: SKSpriteNode, angle: CGFloat){
+        let bullet = SKSpriteNode(color: UIColor.magenta, size: CGSize(width: 3, height: 9))
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bullet.frame.width, height: bullet.frame.height))
         let bulletVelocity = CGVector(dx: cos(angle) * 350.0, dy: sin(angle) * 350.0)
         let bulletPosition = CGPoint(x:fighter.position.x ,y: fighter.position.y)
         //fighter.physicsBody!.velocity = CGVector(dx: 0, dy: 0)
         //fighter.runAction(SKAction.rotateByAngle(CGFloat(angle), duration: 0.20))
         bullet.position = bulletPosition
-        bullet.runAction(SKAction.rotateByAngle(angle+(CGFloat(M_PI/2)), duration: 0.01))
+        bullet.run(SKAction.rotate(byAngle: angle+(CGFloat(M_PI/2)), duration: 0.01))
         bullet.name = "monsterBullet"
         bullet.physicsBody?.affectedByGravity = false
-        bullet.physicsBody?.dynamic = true
+        bullet.physicsBody?.isDynamic = true
         bullet.physicsBody?.mass = 0.01
         bullet.physicsBody?.linearDamping = 0
         bullet.physicsBody?.categoryBitMask = bulletCategory
@@ -321,7 +321,7 @@ class FighterScene: GameScene{
         bullet.physicsBody?.usesPreciseCollisionDetection = true
         bullet.physicsBody?.collisionBitMask = 0x00000000
         bullet.physicsBody?.fieldBitMask = 0x00000000
-        bullet.runAction(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
+        bullet.run(SKAction.playSoundFileNamed("shipBullet.mp3", waitForCompletion: false))
         bullet.physicsBody?.velocity = bulletVelocity
         self.addChild(bullet)
     }

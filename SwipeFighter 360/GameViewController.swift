@@ -22,14 +22,14 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate{
     func saveHighScores(){
         print("Inside GVC.saveHighScores")
         print("saving: playaData.level = \(playaData.level)")
-        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(playaData, toFile: HighScore.ArchiveURL.path!)
+        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(playaData, toFile: HighScore.ArchiveURL.path)
         if !isSuccessfulSave {
             print("Failed to save scores")
         }
     }
     func saveBestScores(){
         print("Saving best score")
-        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(bestHighScore, toFile: BestScore.ArchiveURL2.path!)
+        let isSuccessfulSave = NSKeyedArchiver.archiveRootObject(bestHighScore, toFile: BestScore.ArchiveURL2.path)
         if !isSuccessfulSave {
             print("Failed to save scores")
         }
@@ -37,10 +37,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate{
 
     func loadHighScores() -> HighScore? {
         print("Inside GVC.loadHighScores()")
-        return (NSKeyedUnarchiver.unarchiveObjectWithFile(HighScore.ArchiveURL.path!) as? HighScore)      //(HighScore.ArchiveURL.path!) as? [HighScore]
+        return (NSKeyedUnarchiver.unarchiveObject(withFile: HighScore.ArchiveURL.path) as? HighScore)      //(HighScore.ArchiveURL.path!) as? [HighScore]
     }
     func loadBestScores()->HighScore?{
-        return NSKeyedUnarchiver.unarchiveObjectWithFile(BestScore.ArchiveURL2.path!) as? HighScore
+        return NSKeyedUnarchiver.unarchiveObject(withFile: BestScore.ArchiveURL2.path) as? HighScore
     }
 
     override func viewDidLoad() {
@@ -67,22 +67,22 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate{
         }
         skView.ignoresSiblingOrder = false
         scene = TransitionScene(size:view.frame.size)
-        scene!.scaleMode = .AspectFill
+        scene!.scaleMode = .aspectFill
         scene!.highScore = playaData    //universalHighScores[0]
         print("bestHighScore: \(bestHighScore.level)")
         scene!.bestScore = bestHighScore
         skView.presentScene(scene)
     }
 
-    override func shouldAutorotate() -> Bool {
+    override var shouldAutorotate : Bool {
         return true
     }
 
-    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
-            return .AllButUpsideDown
+    override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            return .allButUpsideDown
         } else {
-            return .All
+            return .all
         }
     }
 
@@ -91,7 +91,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate{
         // Release any cached data, images, etc that aren't in use.
     }
 
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
 }

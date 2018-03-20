@@ -12,13 +12,13 @@ class HelpScene: GameScene {
     
     func addExitButton(){
         let exitButton = UIButton(frame: CGRect(x: self.size.width - 90, y: 0, width: 90, height: 90))
-        exitButton.backgroundColor = UIColor.clearColor()
-        exitButton.setTitle("EXIT", forState: UIControlState.Normal)
-        exitButton.addTarget(self, action: #selector(exitAction), forControlEvents: UIControlEvents.TouchDown)
-        exitButton.setTitleColor(UIColor.greenColor(), forState: UIControlState.Normal)
+        exitButton.backgroundColor = UIColor.clear
+        exitButton.setTitle("EXIT", for: UIControlState())
+        exitButton.addTarget(self, action: #selector(exitAction), for: UIControlEvents.touchDown)
+        exitButton.setTitleColor(UIColor.green, for: UIControlState())
         self.view!.addSubview(exitButton)
     }
-    func exitAction(sender: UIButton!){
+    func exitAction(_ sender: UIButton!){
         self.thisDelegate?.gameSceneDidFinish(self, command: "close")
     }
     override func addFireButton() {
@@ -45,19 +45,19 @@ class HelpScene: GameScene {
         myLevel.fontColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
         let myLabel = SKLabelNode(fontNamed:"Chalkduster")
         myLabel.name = "objective"
-        myLabel.horizontalAlignmentMode = .Left
+        myLabel.horizontalAlignmentMode = .left
         let myLabel2 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel2.name = "objective"
-        myLabel2.horizontalAlignmentMode = .Left
+        myLabel2.horizontalAlignmentMode = .left
         let myLabel3 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel3.name = "objective"
-        myLabel3.horizontalAlignmentMode = .Left
+        myLabel3.horizontalAlignmentMode = .left
         let myLabel4 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel4.name = "objective"
-        myLabel4.horizontalAlignmentMode = .Left
+        myLabel4.horizontalAlignmentMode = .left
         let myLabel5 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel5.name = "objective"
-        myLabel5.horizontalAlignmentMode = .Left
+        myLabel5.horizontalAlignmentMode = .left
         myLabel.text = "I. You can practice levels that you"
         myLabel2.text = "unlocked by hitting the 'level' buttons"
         myLabel3.text = "II. 'Play' delivers the main content"

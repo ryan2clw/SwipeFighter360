@@ -13,27 +13,27 @@ import AVFoundation
 class PracticeScene: GameScene {
     
     enum SongNumber:Int {
-        case One = 1,Two, Three, Four, Five, Six, Seven, Eight, Nine
+        case one = 1,two, three, four, five, six, seven, eight, nine
     }
    // var backgroundAudio:AVAudioPlayer!
     var songPlaying:Int = 9
     var songDesired:Int = 9
     var timeOfLastUpdateForPracticeSong:CFTimeInterval = 0
     
-    func initMusic(song: SongNumber.RawValue){
+    func initMusic(_ song: SongNumber.RawValue){
         songPlaying = song
         songDesired = song
         switch song{
-        case 1: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("stonerTheme1", ofType: "mp3")!))
-        case 2: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dopeTheme2", ofType: "mp3")!))
-        case 3:backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("technoTheme3", ofType: "mp3")!))
-        case 4: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dannyDopeBeat4", ofType: "mp3")!))
-        case 5: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("rapTheme5", ofType: "mp3")!))
-        case 6: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("happyTheme6", ofType: "mp3")!))
-        case 7: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("fastTheme7", ofType: "mp3")!))
-        case 8: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("gangstaTheme8", ofType: "mp3")!))
-        case 9: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dopeTrapBeat9", ofType: "mp3")!))
-        default: backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("stonerTheme1", ofType: "mp3")!))
+        case 1: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "stonerTheme1", ofType: "mp3")!))
+        case 2: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "dopeTheme2", ofType: "mp3")!))
+        case 3:backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "technoTheme3", ofType: "mp3")!))
+        case 4: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "dannyDopeBeat4", ofType: "mp3")!))
+        case 5: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "rapTheme5", ofType: "mp3")!))
+        case 6: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "happyTheme6", ofType: "mp3")!))
+        case 7: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "fastTheme7", ofType: "mp3")!))
+        case 8: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "gangstaTheme8", ofType: "mp3")!))
+        case 9: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "dopeTrapBeat9", ofType: "mp3")!))
+        default: backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "stonerTheme1", ofType: "mp3")!))
         }
     }
 
@@ -46,10 +46,10 @@ class PracticeScene: GameScene {
     
     func addExitButton(){
         let fireButton = UIButton(frame: CGRect(x: self.size.width - 90, y: 0, width: 90, height: 90))
-        fireButton.backgroundColor = UIColor.clearColor()
-        fireButton.setTitle("EXIT", forState: UIControlState.Normal)
-        fireButton.setTitleColor(UIColor.redColor(), forState: UIControlState.Normal)
-        fireButton.addTarget(self, action: #selector(PracticeScene.exitAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+        fireButton.backgroundColor = UIColor.clear
+        fireButton.setTitle("EXIT", for: UIControlState())
+        fireButton.setTitleColor(UIColor.red, for: UIControlState())
+        fireButton.addTarget(self, action: #selector(PracticeScene.exitAction(_:)), for: UIControlEvents.touchDown)
         self.view!.addSubview(fireButton)
     }
     func endGame(){
@@ -59,7 +59,7 @@ class PracticeScene: GameScene {
         }
         self.thisDelegate?.gameSceneDidFinish(self, command: "close")
     }
-    func exitAction(sender: UIButton!){
+    func exitAction(_ sender: UIButton!){
         endGame()
     }
     func updateSong(){
@@ -74,23 +74,23 @@ class PracticeScene: GameScene {
             }
         }
     }
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            if let ship = childNodeWithName("ship"){
+            if let ship = childNode(withName: "ship"){
                 let scalingFactor:CGFloat = 11.0
-                let dx = touch.locationInNode(self).x - ship.position.x
-                let dy = touch.locationInNode(self).y - ship.position.y
+                let dx = touch.location(in: self).x - ship.position.x
+                let dy = touch.location(in: self).y - ship.position.y
                 let shipVelocity = CGVector(dx: scalingFactor*dx, dy: scalingFactor*dy)
                 // while function acts like high pass filter
                 /*while abs(shipVelocity.dx) > CGFloat(650) || abs(shipVelocity.dy) > CGFloat(650){
                 shipVelocity = CGVector(dx: shipVelocity.dx * CGFloat(0.5), dy: shipVelocity.dy * CGFloat(0.5))
                 }*/
-                let waitAction = SKAction.waitForDuration(0.15)
+                let waitAction = SKAction.wait(forDuration: 0.15)
                 let moveAction = SKAction.applyForce(shipVelocity, duration: 0.04)
-                let stopAction = (SKAction.runBlock({
+                let stopAction = (SKAction.run({
                     ship.physicsBody?.velocity = CGVector(dx: 0, dy: 0)}))
                 let actionSequence:[SKAction] = [moveAction, waitAction, stopAction]
-                ship.runAction(SKAction.sequence(actionSequence))
+                ship.run(SKAction.sequence(actionSequence))
                 // tapping ship changes song
                 if (abs(dx) <= 6.0 && abs(dy) <= 6.0){
                     songDesired += 1
@@ -101,13 +101,13 @@ class PracticeScene: GameScene {
             }
         }
     }
-    func updateSongPlaying(currentTime: CFTimeInterval){
+    func updateSongPlaying(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForPracticeSong > 0.1{
             updateSong()
             timeOfLastUpdateForPracticeSong = currentTime
         }
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
         updateSongPlaying(currentTime)
     }

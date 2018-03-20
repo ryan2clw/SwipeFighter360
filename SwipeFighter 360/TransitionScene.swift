@@ -27,7 +27,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
     
     func cleanupStrongReferences(){
         var nodes:[SKNode] = []
-        enumerateChildNodesWithName("//*", usingBlock: {
+        enumerateChildNodes(withName: "//*", using: {
             node, stop in nodes.append(node)
         })
         print("Node Count: \(nodes.count)")
@@ -44,7 +44,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
         boundary.yScale = 1.04
         self.addChild(boundary)
     }
-    override func didMoveToView(view: SKView) {
+    override func didMove(to view: SKView) {
         self.removeAllChildren()
         loadBoundary()
         createLotsaButtons(view)
@@ -56,53 +56,53 @@ class TransitionScene:SKScene, GameSceneDelegate{
         createAsteroid()
     }
 
-    func createPlayButton(view: SKView, x: CGFloat, y: CGFloat, title: String, level: Int, hidden: Bool){
-        let playAgainButton = UIButton(frame: CGRectMake(x, y, self.frame.width/7.0, self.frame.height/5.0))
-        playAgainButton.backgroundColor = UIColor.blackColor()
+    func createPlayButton(_ view: SKView, x: CGFloat, y: CGFloat, title: String, level: Int, hidden: Bool){
+        let playAgainButton = UIButton(frame: CGRect(x: x, y: y, width: self.frame.width/7.0, height: self.frame.height/5.0))
+        playAgainButton.backgroundColor = UIColor.black
         playAgainButton.alpha = 0.6
         playAgainButton.layer.cornerRadius = 11.0
         playAgainButton.layer.borderWidth = 1.0
-        playAgainButton.layer.borderColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0).CGColor
+        playAgainButton.layer.borderColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0).cgColor
         if let titleFont = UIFont(name: "Chalkduster", size: 20.0)  {
             let color = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
             let attributes = [NSFontAttributeName : titleFont, NSForegroundColorAttributeName : color]
-            playAgainButton.setAttributedTitle(NSAttributedString(string: title, attributes: attributes),forState: UIControlState.Normal)
+            playAgainButton.setAttributedTitle(NSAttributedString(string: title, attributes: attributes),for: UIControlState())
             if level == 10{
-                playAgainButton.setAttributedTitle(NSAttributedString(string: "Practice", attributes: attributes), forState: UIControlState.Normal)
+                playAgainButton.setAttributedTitle(NSAttributedString(string: "Practice", attributes: attributes), for: UIControlState())
             }
         }
-        playAgainButton.setTitle("\(level)", forState: UIControlState.Normal)
-        playAgainButton.addTarget(self, action: #selector(TransitionScene.buttonAction(_:)), forControlEvents: UIControlEvents.TouchDown)
-        playAgainButton.hidden = hidden
+        playAgainButton.setTitle("\(level)", for: UIControlState())
+        playAgainButton.addTarget(self, action: #selector(TransitionScene.buttonAction(_:)), for: UIControlEvents.touchDown)
+        playAgainButton.isHidden = hidden
         playAgainButton.titleLabel?.adjustsFontSizeToFitWidth = true
         buttons.append(playAgainButton)
         self.view!.addSubview(playAgainButton)
     }
-    func createHelpButton(view: SKView, x: CGFloat, y: CGFloat, title: String){
-        let helpButton = UIButton(frame: CGRectMake(x, y, self.frame.width/4.0, self.frame.height/5.0))
-        helpButton.backgroundColor = UIColor.blackColor()
+    func createHelpButton(_ view: SKView, x: CGFloat, y: CGFloat, title: String){
+        let helpButton = UIButton(frame: CGRect(x: x, y: y, width: self.frame.width/4.0, height: self.frame.height/5.0))
+        helpButton.backgroundColor = UIColor.black
         helpButton.alpha = 0.6
         helpButton.layer.cornerRadius = 11.0
         helpButton.layer.borderWidth = 1.0
-        helpButton.layer.borderColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0).CGColor
+        helpButton.layer.borderColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0).cgColor
         if let titleFont = UIFont(name: "Chalkduster", size: 30.0)  {
             let color = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
             let attributes = [NSFontAttributeName : titleFont,
                 NSForegroundColorAttributeName : color]
-            helpButton.setAttributedTitle(NSAttributedString(string: title, attributes: attributes),forState: UIControlState.Normal)
+            helpButton.setAttributedTitle(NSAttributedString(string: title, attributes: attributes),for: UIControlState())
         }
         if title == "Help"{
-            helpButton.addTarget(self, action: #selector(TransitionScene.helpAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+            helpButton.addTarget(self, action: #selector(TransitionScene.helpAction(_:)), for: UIControlEvents.touchDown)
         }
         if title == "Play"{
-            helpButton.addTarget(self, action: #selector(TransitionScene.playAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+            helpButton.addTarget(self, action: #selector(TransitionScene.playAction(_:)), for: UIControlEvents.touchDown)
         }
         if title == "Settings"{
-            helpButton.addTarget(self, action: #selector(TransitionScene.settingsAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+            helpButton.addTarget(self, action: #selector(TransitionScene.settingsAction(_:)), for: UIControlEvents.touchDown)
         }
         self.view!.addSubview(helpButton)
     }
-    func createLotsaButtons(view: SKView){
+    func createLotsaButtons(_ view: SKView){
         var x:CGFloat = self.frame.width/12.0
         var y:CGFloat = self.frame.height*0.55
         if let highestLevel = bestScore?.level{
@@ -126,7 +126,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
             }
         }
     }
-    func buttonAction(sender: UIButton!){
+    func buttonAction(_ sender: UIButton!){
 // get level by interpreting the title of the button
         let level = Int(sender!.currentTitle!)!
             self.gameView = SKView(frame: CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height))
@@ -144,7 +144,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
             self.view?.addSubview(gameView!)
         //}
     }
-    func helpAction(sender: UIButton!){
+    func helpAction(_ sender: UIButton!){
         self.arcadeMode = false
         self.gameView = SKView(frame: CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height))
         // set to practice scene or an even more involved tutorial
@@ -158,7 +158,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
         self.view?.addSubview(gameView!)
         //}
     }
-    func playAction(sender: UIButton!){
+    func playAction(_ sender: UIButton!){
         arcadeMode = true
         self.gameView = SKView(frame: CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height))
         // initGameScene sets currentScene according to levvel
@@ -178,7 +178,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
         self.view?.addSubview(gameView!)
         //scene?.paused = true
     }
-    func settingsAction(sender: UIButton!){
+    func settingsAction(_ sender: UIButton!){
         self.arcadeMode = false
         self.gameView = SKView(frame: CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height))
         initGameScene(12)
@@ -187,54 +187,54 @@ class TransitionScene:SKScene, GameSceneDelegate{
         self.view?.addSubview(gameView!)
     }
 
-    func initGameScene(level: Int){
+    func initGameScene(_ level: Int){
         switch level{
         case 0:
-            currentGameScene = LevelOneIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelOneIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 201:
-            currentGameScene = LevelTwoIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelTwoIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 301:
-            currentGameScene = LevelThreeIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelThreeIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 401:
-            currentGameScene = LevelFourIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelFourIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 501:
-            currentGameScene = LevelFiveIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelFiveIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 601:
-            currentGameScene = LevelSixIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelSixIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 701:
-            currentGameScene = LevelSevenIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelSevenIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 801:
-            currentGameScene = LevelEightIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelEightIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 901:
-            currentGameScene = LevelNineIntro(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = LevelNineIntro(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 1:
-            currentGameScene = TwoBrownRockScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = TwoBrownRockScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 2:
-            currentGameScene = AsteroidFieldScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = AsteroidFieldScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 3:
-            currentGameScene = FourRockScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = FourRockScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 4:
-            currentGameScene = ScoutScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = ScoutScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 5:
-            currentGameScene = DestroyerScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = DestroyerScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 6:
-            currentGameScene = DefendEarthScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = DefendEarthScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 7:
-            currentGameScene = AlienInvasionScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = AlienInvasionScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 8:
-            currentGameScene = FighterScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = FighterScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 9:
-            currentGameScene = BossScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = BossScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 10:
-            currentGameScene = PracticeScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = PracticeScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 11:
-            currentGameScene = EndScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = EndScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 12:
-            currentGameScene = SettingsScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = SettingsScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         case 13:
-            currentGameScene = HelpScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = HelpScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         default:
-            currentGameScene = TwoBrownRockScene(size: CGSizeMake(self.frame.size.width, self.frame.size.height))
+            currentGameScene = TwoBrownRockScene(size: CGSize(width: self.frame.size.width, height: self.frame.size.height))
         }
         currentGameScene!.name = "currentScene"
         currentGameScene!.musicOff = self.musicOff
@@ -250,38 +250,38 @@ class TransitionScene:SKScene, GameSceneDelegate{
         myLabel.text = "SwipeFighter 360"
         myLabel.fontSize = 49
         myLabel.fontColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y: self.frame.height*0.55)
+        myLabel.position = CGPoint(x:self.frame.midX, y: self.frame.height*0.55)
         self.addChild(myLabel)
     }
 
     func createShip(){
         let sprite = SKSpriteNode(imageNamed:"newShip")
         let location = CGPoint(x:self.frame.width*1.1, y: self.frame.height*0.58)
-        let rotateAction = SKAction.rotateByAngle(CGFloat(2.0*M_PI), duration:6.5)
-        let moveAction = SKAction.moveByX(-self.frame.width/4.0, y: 0, duration: 2.0)
-        let waitAction = SKAction.waitForDuration(2.5)
-        let returnAction = SKAction.moveByX(self.frame.width/4.0, y: 0, duration: 2.0)
+        let rotateAction = SKAction.rotate(byAngle: CGFloat(2.0*M_PI), duration:6.5)
+        let moveAction = SKAction.moveBy(x: -self.frame.width/4.0, y: 0, duration: 2.0)
+        let waitAction = SKAction.wait(forDuration: 2.5)
+        let returnAction = SKAction.moveBy(x: self.frame.width/4.0, y: 0, duration: 2.0)
         let actionSequence = SKAction.sequence([moveAction, waitAction, returnAction])
         let groupSequence = [rotateAction, actionSequence]
         sprite.position = location
         self.addChild(sprite)
-        sprite.runAction(SKAction.repeatActionForever(SKAction.group(groupSequence)))
+        sprite.run(SKAction.repeatForever(SKAction.group(groupSequence)))
     }
     func createAsteroid(){
         let sprite = SKSpriteNode(imageNamed:"brownRock")
         let location = CGPoint(x:-self.frame.width*0.1, y: self.frame.height*0.58)
-        let rotateAction = SKAction.rotateByAngle(CGFloat(2.0*M_PI), duration:6.5)
-        let moveAction = SKAction.moveByX(self.frame.width/4.0, y: 0, duration: 2.0)
-        let waitAction = SKAction.waitForDuration(2.5)
-        let returnAction = SKAction.moveByX(-self.frame.width/4.0, y: 0, duration: 2.0)
+        let rotateAction = SKAction.rotate(byAngle: CGFloat(2.0*M_PI), duration:6.5)
+        let moveAction = SKAction.moveBy(x: self.frame.width/4.0, y: 0, duration: 2.0)
+        let waitAction = SKAction.wait(forDuration: 2.5)
+        let returnAction = SKAction.moveBy(x: -self.frame.width/4.0, y: 0, duration: 2.0)
         let actionSequence = SKAction.sequence([moveAction, waitAction, returnAction])
         let groupSequence = [rotateAction, actionSequence]
         sprite.position = location
         self.addChild(sprite)
-        sprite.runAction(SKAction.repeatActionForever(SKAction.group(groupSequence)))
+        sprite.run(SKAction.repeatForever(SKAction.group(groupSequence)))
     }
 
-    func gameSceneDidFinish(myScene: GameScene,command: String) {
+    func gameSceneDidFinish(_ myScene: GameScene,command: String) {
         myScene.removeBulletSounds()
         myScene.cleanupStrongReferences()
        // self.cleanupStrongReferences()
@@ -304,13 +304,13 @@ class TransitionScene:SKScene, GameSceneDelegate{
             self.gameView = nil
         }
     }
-    func saveHighScore(mainFile:AppDelegate, command: String){
+    func saveHighScore(_ mainFile:AppDelegate, command: String){
         if (command == "save"){
             mainFile.savePlayaData()
         }
     }
     
-    func changeScene(myScene: GameScene,command: String){
+    func changeScene(_ myScene: GameScene,command: String){
         myScene.removeBulletSounds()
         myScene.cleanupStrongReferences()
         //self.cleanupStrongReferences()
@@ -348,7 +348,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
         }
     }
     
-    func updateTransitionLevvel(myScene:GameScene){
+    func updateTransitionLevvel(_ myScene:GameScene){
         // THIS FUNCTION TRANSFERS HIGH SCORE AND BESTSCORE FROM GAMESCENE
         self.swipeMode = myScene.swipeMode
         self.musicOff = myScene.musicOff
@@ -357,7 +357,7 @@ class TransitionScene:SKScene, GameSceneDelegate{
         self.bestScore = myScene.bestScore
         self.highScore = myScene.highScore
     }
-    override func update(currentTime: NSTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         if currentTime - timeOfLastUpdate > 0.5{
             for button in buttons{
                 if let _ = button.titleLabel?.text{
@@ -366,9 +366,9 @@ class TransitionScene:SKScene, GameSceneDelegate{
                     if let int = Int(intString){
                         if let best = self.bestScore?.level{
                             if int <= best{
-                                button.hidden = false
+                                button.isHidden = false
                             }else{
-                                button.hidden = true
+                                button.isHidden = true
                             }
                         }
                     }

@@ -16,7 +16,7 @@ class LevelSevenIntro: GameScene {
         return
     }
     
-    func exitAction(sender: UIButton!){
+    func exitAction(_ sender: UIButton!){
         self.level = 7
         self.highScore?.level = 7
         self.thisDelegate?.updateTransitionLevvel(self)
@@ -25,10 +25,10 @@ class LevelSevenIntro: GameScene {
     
     func addExitButton(){
         let fireButton = UIButton(frame: CGRect(x: self.size.width - 90, y: 0, width: 90, height: 90))
-        fireButton.backgroundColor = UIColor.clearColor()
-        fireButton.setTitle("EXIT", forState: UIControlState.Normal)
-        fireButton.setTitleColor(UIColor.greenColor(), forState: UIControlState.Normal)
-        fireButton.addTarget(self, action: #selector(LevelSevenIntro.exitAction(_:)), forControlEvents: UIControlEvents.TouchDown)
+        fireButton.backgroundColor = UIColor.clear
+        fireButton.setTitle("EXIT", for: UIControlState())
+        fireButton.setTitleColor(UIColor.green, for: UIControlState())
+        fireButton.addTarget(self, action: #selector(LevelSevenIntro.exitAction(_:)), for: UIControlEvents.touchDown)
         self.view!.addSubview(fireButton)
     }
     override func addFireButton() {
@@ -64,43 +64,43 @@ class LevelSevenIntro: GameScene {
         rock.physicsBody!.categoryBitMask = rockCategory
         rock.physicsBody!.contactTestBitMask = bulletCategory
         rock.physicsBody!.collisionBitMask = edgeCategory | rockCategory
-        rock.physicsBody!.velocity = CGVectorMake(-110,0)
+        rock.physicsBody!.velocity = CGVector(dx: -110,dy: 0)
     }
     
     override func createContent() {
-        self.userInteractionEnabled = false
+        self.isUserInteractionEnabled = false
         super.createContent()
         timeOfLastUpdateForInvaderAttack = 0.0
         addExitButton()
-        if let ship = childNodeWithName("ship"){
+        if let ship = childNode(withName: "ship"){
             ship.position = CGPoint(x: self.frame.width*0.02, y: 0)
-            ship.runAction(SKAction.rotateByAngle(CGFloat(-M_PI/2.0), duration: 0.017))
+            ship.run(SKAction.rotate(byAngle: CGFloat(-M_PI/2.0), duration: 0.017))
         }
         addEarth()
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         invaderAttack(currentTime)
         initializeTimer(currentTime)
         processContactsForUpdate(currentTime)
         super.updateBulletDelay(currentTime)
         if gameEnded(currentTime){
-            scene?.paused = true
+            scene?.isPaused = true
         }
     }
-    func invaderAttack(currentTime: CFTimeInterval){
+    func invaderAttack(_ currentTime: CFTimeInterval){
         if (currentTime - timeOfLastUpdateForInvaderAttack > 0.4) {
             addMonster()
             //loadAsteroid()
             timeOfLastUpdateForInvaderAttack = currentTime
         }
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
             timeOfLastUpdateForInvaderAttack = currentTime
         }
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -111,14 +111,14 @@ class LevelSevenIntro: GameScene {
         self.addChild(myLabel)
     }
     func moveShip(){
-        if let ship = childNodeWithName("ship") as? SKSpriteNode{
-            let moveAction = SKAction.moveToY(self.size.height*0.8, duration: 0.4)
-            let waitAction = SKAction.waitForDuration(0.2)
-            let returnAction = SKAction.moveToY(self.size.height/2.0, duration: 0.4)
-            let rotateAction = SKAction.rotateByAngle(CGFloat(M_PI*0.66), duration: 0.4)
-            let fireAction = SKAction.runBlock({self.shipAngle += M_PI*0.66;self.fireBullets()})
+        if let ship = childNode(withName: "ship") as? SKSpriteNode{
+            let moveAction = SKAction.moveTo(y: self.size.height*0.8, duration: 0.4)
+            let waitAction = SKAction.wait(forDuration: 0.2)
+            let returnAction = SKAction.moveTo(y: self.size.height/2.0, duration: 0.4)
+            let rotateAction = SKAction.rotate(byAngle: CGFloat(M_PI*0.66), duration: 0.4)
+            let fireAction = SKAction.run({self.shipAngle += M_PI*0.66;self.fireBullets()})
             let sequence:[SKAction]=[waitAction, moveAction,rotateAction,fireAction,returnAction, moveAction]
-            ship.runAction(SKAction.sequence(sequence))
+            ship.run(SKAction.sequence(sequence))
         }
     }
     func addMonster() {
@@ -140,33 +140,33 @@ class LevelSevenIntro: GameScene {
         self.addChild(monster)
         let randomSpeed = drand48()*3+3
         let actionMove = SKAction.applyImpulse(CGVector(dx: -randomSpeed, dy:0) ,duration: 0.1)
-        let waitAction = SKAction.waitForDuration(10.0)
+        let waitAction = SKAction.wait(forDuration: 10.0)
         let removeAction = SKAction.removeFromParent()
         let sequence = [actionMove,waitAction,removeAction]
-        monster.runAction(SKAction.sequence(sequence))
+        monster.run(SKAction.sequence(sequence))
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("rock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("rock") && (nodeNames as NSArray).contains("bullet")){
             points += 10
             contact.bodyA.node!.removeFromParent()
             contact.bodyB.node!.removeFromParent()
             if super.explosionOff{
                 return
             }
-            self.runAction(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
+            self.run(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             }else{
                 contact.bodyB.node!.removeFromParent()
             }
         }
-        if ((nodeNames as NSArray).containsObject("invader") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("invader") && (nodeNames as NSArray).contains("bullet")){
             // explosion sounds, bullet and invader removed
             contact.bodyA.node!.removeFromParent()
             contact.bodyB.node!.removeFromParent()
@@ -174,7 +174,7 @@ class LevelSevenIntro: GameScene {
             if super.explosionOff{
                 return
             }
-            self.runAction(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
+            self.run(SKAction.playSoundFileNamed("explosion.wav", waitForCompletion: false))
         }
     }
     func displayObjective(){
@@ -184,16 +184,16 @@ class LevelSevenIntro: GameScene {
         myLevel.fontColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
         let myLabel = SKLabelNode(fontNamed:"Chalkduster")
         myLabel.name = "objective"
-        myLabel.horizontalAlignmentMode = .Left
+        myLabel.horizontalAlignmentMode = .left
         let myLabel2 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel2.name = "objective"
-        myLabel2.horizontalAlignmentMode = .Left
+        myLabel2.horizontalAlignmentMode = .left
         let myLabel3 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel3.name = "objective"
-        myLabel3.horizontalAlignmentMode = .Left
+        myLabel3.horizontalAlignmentMode = .left
         let myLabel4 = SKLabelNode(fontNamed: "Chalkduster")
         myLabel4.name = "objective"
-        myLabel4.horizontalAlignmentMode = .Left
+        myLabel4.horizontalAlignmentMode = .left
         myLabel.text = "Radar picked up an invading force behind"
         myLabel2.text = "those asteroids. They're sitting ducks without"
         myLabel3.text = "the destroyer nearby.  Wipe them out."
@@ -209,14 +209,14 @@ class LevelSevenIntro: GameScene {
         myLabel3.fontSize = 25
         myLabel3.fontColor = UIColor.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
         myLabel4.fontSize = 23
-        myLabel4.fontColor = UIColor.whiteColor()  //.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
+        myLabel4.fontColor = UIColor.white  //.init(colorLiteralRed: 0.6, green: 0.9, blue: 1.0, alpha: 1.0)
         self.addChild(myLabel)
         self.addChild(myLabel2)
         self.addChild(myLabel3)
         self.addChild(myLabel4)
     }
     
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
         timerLevelThree = currentTime - timeOfLastUpdateForLevel
         if timerLevelThree > 7.0{
             super.level = 7

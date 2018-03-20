@@ -30,10 +30,10 @@ class AsteroidFieldScene: GameScene{
         if super.musicOff{
             return
         }
-        backgroundAudio = try! AVAudioPlayer(contentsOfURL: NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("dopeTheme2", ofType: "mp3")!))
+        backgroundAudio = try! AVAudioPlayer(contentsOf: URL(fileURLWithPath: Bundle.main.path(forResource: "dopeTheme2", ofType: "mp3")!))
         super.playTheme(backgroundAudio, volume: 0.3)
     }
-    func asteroidField(currentTime: CFTimeInterval){
+    func asteroidField(_ currentTime: CFTimeInterval){
         if currentTime - timeOfLastUpdateForAsteroidField > 2.0 {
             let rock = SKSpriteNode(imageNamed: "brownRock")
             rock.name = "brownRock"
@@ -49,7 +49,7 @@ class AsteroidFieldScene: GameScene{
             rock.physicsBody?.mass = 0.1
             rock.physicsBody?.linearDamping = 0
             rock.physicsBody?.restitution = 1.0 
-            let waitAction = SKAction.waitForDuration(10.0)
+            let waitAction = SKAction.wait(forDuration: 10.0)
             let removeAction = SKAction.removeFromParent()
             // pick random side and pass in position and velocity
             let randomSide = arc4random_uniform(4)
@@ -107,13 +107,13 @@ class AsteroidFieldScene: GameScene{
             let sequence = [actionMove,waitAction,removeAction]
             // add rocks and let er rip
             self.addChild(rock)
-            rock.runAction(SKAction.sequence(sequence))
+            rock.run(SKAction.sequence(sequence))
             timeOfLastUpdateForAsteroidField = currentTime
         }
     }
 
-    func createGravityField(strength: vector_float3){
-        let gravityNode = SKFieldNode.linearGravityFieldWithVector(strength)
+    func createGravityField(_ strength: vector_float3){
+        let gravityNode = SKFieldNode.linearGravityField(withVector: strength)
         
         if strength.x > 0{
             gravityNode.categoryBitMask = rightFieldCategory
@@ -129,12 +129,12 @@ class AsteroidFieldScene: GameScene{
         }
         self.addChild(gravityNode)
     }
-    override func handleContact(contact: SKPhysicsContact) {
+    override func handleContact(_ contact: SKPhysicsContact) {
         if (contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil){
             return
         }
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-        if ((nodeNames as NSArray).containsObject("brownRock") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("brownRock") && (nodeNames as NSArray).contains("bullet")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "brownRock"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -150,14 +150,14 @@ class AsteroidFieldScene: GameScene{
             }
             monstersHit += 1
         }
-        if ((nodeNames as NSArray).containsObject("boundary") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("boundary") && (nodeNames as NSArray).contains("bullet")){
             if(contact.bodyA.node!.name == "bullet"){
                 contact.bodyA.node!.removeFromParent()
             } else{
                 contact.bodyB.node!.removeFromParent()
             }
         }
-        if ((nodeNames as NSArray).containsObject("ship")){
+        if ((nodeNames as NSArray).contains("ship")){
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "ship"){
                 explosion = contact.bodyA.node! as! SKSpriteNode
@@ -173,7 +173,7 @@ class AsteroidFieldScene: GameScene{
             }
 
         }
-        if ((nodeNames as NSArray).containsObject("invader") && (nodeNames as NSArray).containsObject("bullet")){
+        if ((nodeNames as NSArray).contains("invader") && (nodeNames as NSArray).contains("bullet")){
             monstersHit += 1
             var explosion:SKSpriteNode!
             if(contact.bodyA.node!.name == "invader"){
@@ -190,7 +190,7 @@ class AsteroidFieldScene: GameScene{
             }
         }
     }
-    func displayTimer(timer: Int){
+    func displayTimer(_ timer: Int){
         let myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.name = "timer"
         myLabel.position = CGPoint(x: self.size.width * 0.9, y: self.size.height * 0.9)
@@ -200,13 +200,13 @@ class AsteroidFieldScene: GameScene{
         myLabel.alpha = 0.9
         self.addChild(myLabel)
     }
-    override func gameEnded(currentTime: CFTimeInterval)->Bool{
+    override func gameEnded(_ currentTime: CFTimeInterval)->Bool{
 // super checks for ship, other endings are specific to level
         if super.gameEnded(currentTime){
             return true
         }
         timerLevelTwo = currentTime - timeOfLastUpdateForLevel
-        let timer = childNodeWithName("timer") as! SKLabelNode
+        let timer = childNode(withName: "timer") as! SKLabelNode
         timer.text = "Timer: \(Int(timerLevelTwo))"
         if timerLevelTwo > 60.0{
             super.level = 301
@@ -215,18 +215,18 @@ class AsteroidFieldScene: GameScene{
         }
         return false
     }
-    func initializeTimer(currentTime: CFTimeInterval){
+    func initializeTimer(_ currentTime: CFTimeInterval){
         if timeOfLastUpdateForLevel < 0.1{
             timeOfLastUpdateForLevel = currentTime
         }
     }
-    override func update(currentTime: CFTimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         initializeTimer(currentTime)
         super.update(currentTime)
         gameEnds = gameEnded(currentTime)
         if gameEnds == true{
-            if let _ = childNodeWithName("timer"){
-                let timerLabel = childNodeWithName("timer") as! SKLabelNode
+            if let _ = childNode(withName: "timer"){
+                let timerLabel = childNode(withName: "timer") as! SKLabelNode
                  timerLabel.text = "DONE"
             }
             motionManager.stopAccelerometerUpdates()
@@ -240,12 +240,12 @@ class AsteroidFieldScene: GameScene{
                     updateAccuracy()
                     updateBestScore()
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    self.paused = true
+                    self.isPaused = true
                     self.thisDelegate?.changeScene(self, command: "close")
                 }else{
                     self.highScore?.lives += 1
                     self.thisDelegate?.updateTransitionLevvel(self)
-                    scene?.paused = true
+                    scene?.isPaused = true
                     self.thisDelegate?.gameSceneDidFinish(self, command: "close")
                 }
             }

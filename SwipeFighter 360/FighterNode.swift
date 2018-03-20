@@ -12,7 +12,7 @@ class FighterNode: SKSpriteNode {
     
     var angle:CGFloat = CGFloat(M_PI)
     
-    func addDifferenceBetweenAngles(destinationAngle: CGFloat)->CGFloat{
+    func addDifferenceBetweenAngles(_ destinationAngle: CGFloat)->CGFloat{
         var difference: CGFloat = destinationAngle - angle
         
         let increment = CGFloat(2.0*M_PI)
